@@ -1,0 +1,2806 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NEO HARVEST: Bangkit dari Bangkrut</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  html, body {
+    background-color: #12141d;
+    color: #ffffff;
+    font-family: 'Courier New', Courier, monospace;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background-color: #2d4c2b;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(15, 18, 28, 0.96);
+    z-index: 20;
+    padding: 12px;
+    text-align: center;
+    overflow-y: auto;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .neo-logo {
+    font-size: clamp(42px, 11vw, 70px);
+    font-weight: 900;
+    letter-spacing: 9px;
+    background: linear-gradient(90deg, #00f2fe, #4facfe, #00f2fe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 24px rgba(0, 242, 254, 0.45);
+    animation: pulseNeo 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseNeo {
+    0%, 100% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.05); filter: brightness(1.25); }
+  }
+
+  .card-box {
+    background-color: #1e2436;
+    border: 2.5px solid #4facfe;
+    border-radius: 12px;
+    padding: 14px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.65);
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    margin: 6px 0 10px;
+    border-radius: 8px;
+    border: 2px solid #4facfe;
+    background-color: #121622;
+    color: #ffffff;
+    font-size: 14px;
+    font-family: inherit;
+    text-align: center;
+    outline: none;
+  }
+
+  input[type="text"]:focus {
+    border-color: #fbbf24;
+  }
+
+  .char-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .char-item {
+    background-color: #141824;
+    border: 2px solid #323c59;
+    border-radius: 8px;
+    padding: 5px 4px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.14s ease, border-color 0.14s ease, background-color 0.14s ease;
+  }
+
+  .char-item:hover {
+    border-color: #60a5fa;
+  }
+
+  .char-item.selected {
+    border-color: #ffd700;
+    background-color: #27314d;
+    transform: translateY(-2px);
+  }
+
+  .char-item span {
+    font-size: 9.5px;
+    margin-top: 3px;
+    color: #cbd5e1;
+    line-height: 1.15;
+  }
+
+  .game-btn {
+    background: linear-gradient(180deg, #38bdf8, #0284c7);
+    border: none;
+    border-bottom: 3px solid #0369a1;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 9px 16px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+    transition: transform 0.1s ease;
+  }
+
+  .game-btn:active {
+    transform: translateY(2px);
+    border-bottom-width: 2px;
+  }
+
+  .game-btn-gold {
+    background: linear-gradient(180deg, #fbbf24, #d97706);
+    border-bottom-color: #92400e;
+    color: #111827;
+  }
+
+  /* HUD Atas Ringkas (2 Panel Sleek) */
+  #hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 6px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 6px;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .hud-panel {
+    background-color: rgba(18, 22, 34, 0.92);
+    border: 1.5px solid #475569;
+    border-radius: 8px;
+    padding: 5px 7px;
+    font-size: 10px;
+    line-height: 1.3;
+    pointer-events: auto;
+    max-width: 52%;
+  }
+
+  .hud-btn {
+    background-color: #334155;
+    border: 1px solid #94a3b8;
+    color: #ffffff;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-family: inherit;
+    cursor: pointer;
+    margin-left: 3px;
+    margin-top: 3px;
+    transition: background-color 0.14s ease;
+  }
+
+  .hud-btn:first-child {
+    margin-left: 0;
+  }
+
+  .hud-btn:active {
+    background-color: #475569;
+  }
+
+  /* Toolbar Alat & Benih Ringkas */
+  #toolbar {
+    position: absolute;
+    bottom: 102px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+    background-color: rgba(18, 22, 34, 0.92);
+    padding: 5px 6px;
+    border-radius: 10px;
+    border: 1.5px solid #475569;
+    z-index: 10;
+    max-width: 96%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  #toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .slot {
+    min-width: 58px;
+    height: 48px;
+    background-color: #1e293b;
+    border: 1.5px solid #475569;
+    border-radius: 7px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 8.5px;
+    cursor: pointer;
+    position: relative;
+    padding: 2px 5px;
+    flex-shrink: 0;
+  }
+
+  .slot.active {
+    border-color: #ffd700;
+    background-color: #334155;
+  }
+
+  .slot-count {
+    position: absolute;
+    top: 1px;
+    right: 3px;
+    font-size: 8.5px;
+    color: #fbbf24;
+    font-weight: bold;
+  }
+
+  /* Kontrol Sentuh D-Pad & Tombol Aksi */
+  #controls {
+    position: absolute;
+    bottom: 8px;
+    left: 10px;
+    right: 10px;
+    height: 88px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .dpad {
+    position: relative;
+    width: 88px;
+    height: 88px;
+    pointer-events: auto;
+    flex-shrink: 0;
+  }
+
+  .d-btn {
+    position: absolute;
+    width: 29px;
+    height: 29px;
+    background-color: rgba(255, 255, 255, 0.22);
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    border-radius: 7px;
+    color: #ffffff;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .d-btn:active {
+    background-color: rgba(56, 189, 248, 0.7);
+  }
+
+  .d-up { top: 0; left: 29.5px; }
+  .d-down { bottom: 0; left: 29.5px; }
+  .d-left { top: 29.5px; left: 0; }
+  .d-right { top: 29.5px; right: 0; }
+
+  .action-pad {
+    display: flex;
+    gap: 8px;
+    pointer-events: auto;
+    flex-shrink: 0;
+  }
+
+  .act-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2.5px solid rgba(255, 255, 255, 0.7);
+    font-weight: bold;
+    font-size: 9px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.15;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+    transition: transform 0.1s ease;
+  }
+
+  .act-btn:active {
+    transform: scale(0.94);
+  }
+
+  .act-use { background-color: rgba(34, 197, 94, 0.88); }
+  .act-sleep { background-color: rgba(99, 102, 241, 0.88); }
+
+  /* Modal Toko, Peti Penyimpanan AI & Gudang Panen */
+  .modal-box {
+    background-color: #1e2436;
+    border: 2.5px solid #fbbf24;
+    border-radius: 12px;
+    padding: 12px;
+    max-width: 420px;
+    width: 100%;
+    max-height: 82%;
+    overflow-y: auto;
+    text-align: left;
+  }
+
+  .shop-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    background-color: #131722;
+    padding: 7px 9px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    border: 1px solid #334155;
+  }
+
+  .toast {
+    position: absolute;
+    top: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(15, 23, 42, 0.95);
+    border: 1px solid #38bdf8;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    color: #e0f2fe;
+    z-index: 15;
+    pointer-events: none;
+    max-width: 92%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Canvas Utama Game -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- 1. Layar Pembuka Logo NEO -->
+  <div id="screenLogo" class="screen">
+    <div class="neo-logo">NEO</div>
+    <p class="text-slate-400 mt-2 tracking-[0.25em] text-xs">INTERACTIVE STUDIO</p>
+    <p id="loadingStatus" class="text-sky-400 mt-6 text-sm">Memuat Aset Pixel Art...</p>
+  </div>
+
+  <!-- 2. Layar Input Nama & Pilih Karakter -->
+  <div id="screenSetup" class="screen hidden">
+    <div class="card-box">
+      <div class="text-xl font-bold text-sky-400">NEO HARVEST</div>
+      <div class="text-xs text-slate-400 mb-3">Bangkit dari Kebangkrutan Perusahaan</div>
+
+      <label for="playerNameInput" class="block text-xs text-slate-200 text-left">Masukkan Nama Bos:</label>
+      <input type="text" id="playerNameInput" placeholder="Ketik namamu..." maxlength="14" value="Bos Muda">
+
+      <div class="text-xs text-slate-200 text-left mb-2">Pilih Karakter Pixel:</div>
+      <div class="char-grid" id="charGrid"></div>
+
+      <button type="button" class="game-btn game-btn-gold" onclick="startStoryCutscene()">MULAI CERITA ▶</button>
+    </div>
+  </div>
+
+  <!-- 3. Layar Cutscene Cerita Kebangkrutan -->
+  <div id="screenStory" class="screen hidden">
+    <canvas id="storyCanvas" width="340" height="220" class="border-[3px] border-sky-400 rounded-xl mb-3 max-w-full"></canvas>
+    <div class="card-box" style="max-width: 340px;">
+      <p id="storyText" class="text-xs sm:text-sm leading-relaxed min-h-[72px] text-slate-100"></p>
+      <button type="button" class="game-btn mt-3" id="storyNextBtn" onclick="nextStoryStep()">Lanjut ▶</button>
+    </div>
+  </div>
+
+  <!-- HUD Gameplay -->
+  <div id="hud" class="hidden">
+    <div class="hud-panel">
+      <div class="truncate"><strong id="hudName" class="text-sky-400">Bos</strong> | <span id="hudSeason" class="text-emerald-400">Semi</span></div>
+      <div>H<span id="hudDay">1</span> <span id="hudTime">06:00</span> | <span class="text-amber-400 font-bold">$<span id="hudMoney">450</span></span></div>
+      <div class="text-[9px] text-rose-300">Pajak: 30% | HP: <span id="hudPlayerHp">100</span></div>
+    </div>
+    <div class="hud-panel text-right">
+      <div class="truncate">Lahan <span id="hudPlots">1</span>/4 | <span id="hudWorker" class="text-slate-400">0/2 AI</span></div>
+      <div class="flex justify-end flex-wrap">
+        <button type="button" class="hud-btn" onclick="openShop()">Toko</button>
+        <button type="button" class="hud-btn" style="background-color:#7f1d1d; border-color:#f87171;" onclick="openGearModal()">Perlengkapan</button>
+        <button type="button" id="btnStorage" class="hud-btn hidden" style="background-color:#78350f; border-color:#fbbf24;" onclick="openSeedBox()">Peti AI</button>
+        <button type="button" class="hud-btn" onclick="openBag()">Panen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notifikasi Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Toolbar Alat, Senjata & Benih -->
+  <div id="toolbar" class="hidden"></div>
+
+  <!-- Kontrol Sentuh D-Pad & Tombol Aksi -->
+  <div id="controls" class="hidden">
+    <div class="dpad" aria-label="Kontrol Arah">
+      <div class="d-btn d-up" data-dir="up">▲</div>
+      <div class="d-btn d-down" data-dir="down">▼</div>
+      <div class="d-btn d-left" data-dir="left">◀</div>
+      <div class="d-btn d-right" data-dir="right">▶</div>
+    </div>
+    <div class="action-pad">
+      <div class="act-btn act-sleep" onclick="sleepNextDay()">TIDUR<br>💤</div>
+      <div class="act-btn act-use" onclick="performAction()">AKSI<br>⚔️</div>
+    </div>
+  </div>
+
+  <!-- Modal Toko Benih, 2 Pekerja Petani AI, Pedang, Baju Zirah & Perluasan Lahan -->
+  <div id="modalShop" class="screen hidden" style="background-color: rgba(0, 0, 0, 0.82);">
+    <div class="modal-box">
+      <div class="flex justify-between items-center mb-2">
+        <strong class="text-amber-400 text-sm sm:text-base">🏪 TOKO TANI, SENJATA & SERTIFIKAT</strong>
+        <button type="button" class="hud-btn" onclick="closeModals()">✖ Tutup</button>
+      </div>
+      <p class="text-[11px] text-slate-400 mb-3">
+        Penjualan hasil panen & hadiah monster terkena <strong>Pajak 30%</strong>. Sewa hingga <strong>2 Petani AI</strong> yang otomatis bekerja di <strong>SEMUA lahan yang sudah dibeli</strong>!
+      </p>
+      <div id="shopContent"></div>
+    </div>
+  </div>
+
+  <!-- Modal Perlengkapan Bos & 2 AI (Pedang, Baju Zirah & Area Kerja AI) -->
+  <div id="modalGear" class="screen hidden" style="background-color: rgba(0, 0, 0, 0.82);">
+    <div class="modal-box" style="border-color: #f87171;">
+      <div class="flex justify-between items-center mb-2">
+        <strong class="text-rose-400 text-sm sm:text-base">⚔️ PERLENGKAPAN BOS & 2 PETANI AI</strong>
+        <button type="button" class="hud-btn" onclick="closeModals()">✖ Tutup</button>
+      </div>
+      <p class="text-[11px] text-slate-300 mb-2">
+        Pasang Pedang & Baju Zirah ke dirimu atau berikan ke Petani AI #1 dan #2. Keduanya otomatis membagi tugas di <strong>seluruh lahan terbuka</strong>!
+      </p>
+      <div id="gearContent"></div>
+    </div>
+  </div>
+
+  <!-- Modal Tas Hasil Panen -->
+  <div id="modalBag" class="screen hidden" style="background-color: rgba(0, 0, 0, 0.82);">
+    <div class="modal-box">
+      <div class="flex justify-between items-center mb-2">
+        <strong class="text-emerald-400 text-sm sm:text-base">🎒 GUDANG PANEN (PAJAK 30%)</strong>
+        <button type="button" class="hud-btn" onclick="closeModals()">✖ Tutup</button>
+      </div>
+      <div id="bagContent"></div>
+      <button type="button" class="game-btn game-btn-gold mt-3" onclick="sellAllCrops()">JUAL SEMUA (POTONG PAJAK 30%) 💰</button>
+    </div>
+  </div>
+
+  <!-- Modal Peti Penyimpanan AI -->
+  <div id="modalSeedBox" class="screen hidden" style="background-color: rgba(0, 0, 0, 0.82);">
+    <div class="modal-box" style="border-color: #38bdf8;">
+      <div class="flex justify-between items-center mb-2">
+        <strong class="text-sky-400 text-sm sm:text-base">📦 PETI PENYIMPANAN AI</strong>
+        <button type="button" class="hud-btn" onclick="closeModals()">✖ Tutup</button>
+      </div>
+      <p class="text-[11px] text-slate-300 mb-2">
+        Taruh bibit musim ini ke Peti AI. Kedua Petani AI akan mengambil bibit dan menanamnya di <strong>SELURUH petak lahan yang sudah kamu beli</strong>, menyiram, melawan monster, panen & jual otomatis!
+      </p>
+      <div id="aiLogBox" class="bg-slate-950/90 border border-slate-700 rounded-lg p-2 mb-3 text-[10.5px] text-emerald-300 max-h-24 overflow-y-auto">
+        <div>• Peti Penyimpanan AI siap.</div>
+      </div>
+      <div id="seedBoxContent"></div>
+      <button type="button" class="game-btn mt-3" onclick="wakeAiFarmerNow()">🤖 AKTIFKAN / PERIKSA LOOP 2 PETANI AI</button>
+    </div>
+  </div>
+
+<script>
+// ============================================================================
+// 1. SISTEM SPRITE PIXEL ART (KARAKTER, TANAMAN & 16 MONSTER TANAMAN UNIK)
+// ============================================================================
+const SPRITES = {};
+
+function createPixelCanvas(w, h, drawFn) {
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  try {
+    drawFn(ctx);
+  } catch (err) {
+    console.error('Gagal menggambar sprite:', err);
+  }
+  return c;
+}
+
+function drawMatrix(ctx, matrix, palette, scale = 1) {
+  for (let y = 0; y < matrix.length; y++) {
+    const row = matrix[y];
+    for (let x = 0; x < row.length; x++) {
+      const ch = row[x];
+      if (ch !== '.' && palette[ch]) {
+        ctx.fillStyle = palette[ch];
+        ctx.fillRect(x * scale, y * scale, scale, scale);
+      }
+    }
+  }
+}
+
+// 6 Karakter Pixel Art
+const CHARACTER_DEFS = [
+  { id: 'mayor', name: 'Bos NEO (Jas)', hat: '#2b1d14', hair: '#2b1d14', skin: '#c68642', shirt: '#1e293b', sash: '#dc2626', pants: '#0f172a' },
+  { id: 'farmer', name: 'Straw-hat Farmer', hat: '#eab308', hair: '#78350f', skin: '#f1c27d', shirt: '#dc2626', sash: '#2563eb', pants: '#1d4ed8' },
+  { id: 'florist', name: 'Florist', hat: '#f472b6', hair: '#713f12', skin: '#ffdbac', shirt: '#f472b6', sash: '#fbcfe8', pants: '#db2777' },
+  { id: 'gardener', name: 'Gardener', hat: '#d97706', hair: '#451a03', skin: '#a16207', shirt: '#b91c1c', sash: '#1d4ed8', pants: '#1e3a8a' },
+  { id: 'carpenter', name: 'Carpenter', hat: '#78350f', hair: '#78350f', skin: '#f1c27d', shirt: '#ea580c', sash: '#1d4ed8', pants: '#1e40af' },
+  { id: 'herbalist', name: 'Herbalist', hat: '#3f6212', hair: '#451a03', skin: '#d2996c', shirt: '#365314', sash: '#713f12', pants: '#422006' }
+];
+
+function buildCharacterSprites() {
+  CHARACTER_DEFS.forEach(def => {
+    SPRITES[def.id] = [0, 1].map(step => createPixelCanvas(22, 19, ctx => {
+      const p = {
+        'O': '#111111',
+        'H': def.hat,
+        'R': def.hair,
+        'S': def.skin,
+        'C': def.shirt,
+        'A': def.sash,
+        'P': def.pants,
+        'B': '#451a03'
+      };
+      const legFrame0 = [
+        "......OOOOOOOOOO......",
+        ".....OHHHHHHHHHHO.....",
+        "....OHHHHHHHHHHHHO....",
+        "....OORRRRRRRRRROO....",
+        ".....OSSSSSSSSSSO.....",
+        ".....OSOSOOOOSSOO.....",
+        ".....OSSSSSSSSSSO.....",
+        "......OSSSSSSSSO......",
+        "....OOCCCCCCCCCCOO....",
+        "...OCCCCCCCCCCCCCCO...",
+        "...OCSCCCAACCCCSCCO...",
+        "...OCSCCCAACCCCSCCO...",
+        "...OSSOCCCCCCCOSSO....",
+        ".....OPPPPPPPPPPO.....",
+        ".....OPPPPOOPPPPO.....",
+        ".....OPPPPOOPPPPO.....",
+        ".....OPPPPOOPPPPO.....",
+        ".....OBBBBOOBBBBO.....",
+        "....OOBBBBOOOBBBBOO..."
+      ];
+      const legFrame1 = [
+        "......OOOOOOOOOO......",
+        ".....OHHHHHHHHHHO.....",
+        "....OHHHHHHHHHHHHO....",
+        "....OORRRRRRRRRROO....",
+        ".....OSSSSSSSSSSO.....",
+        ".....OSOSOOOOSSOO.....",
+        ".....OSSSSSSSSSSO.....",
+        "......OSSSSSSSSO......",
+        "....OOCCCCCCCCCCOO....",
+        "...OCCCCCCCCCCCCCCO...",
+        "...OCSCCCAACCCCSCCO...",
+        "...OCSCCCAACCCCSCCO...",
+        "...OSSOCCCCCCCOSSO....",
+        ".....OPPPPPPPPPPO.....",
+        "....OPPPPO..OPPPPO....",
+        "....OPPPPO..OPPPPO....",
+        "....OBBBBO..OBBBBO....",
+        "...OOBBBBO..OOBBBBOO..",
+        "......................"
+      ];
+      drawMatrix(ctx, step === 0 ? legFrame0 : legFrame1, p, 1);
+    }));
+  });
+}
+
+// 16 Tanaman di 4 Musim (Semi, Panas, Gugur, Dingin)
+const CROPS_DB = {
+  strawberry: { name: 'Stroberi', season: 'Spring', days: 3, seedPrice: 30, sellPrice: 85, palette: { O: '#111', G: '#22c55e', R: '#ef4444', D: '#b91c1c', Y: '#fef08a' }, art: ["......OOOO......","....OOGGGGOO....","...OGGGGGGGGO...","..OORRRRRRRROO..",".ORRYRRRRRYRRDO.",".ORRRRRRRRRRRDO.",".ORRYRRRRRYRRDO.","..ORRRRRRRRRDO..","..ORRRYRRRDRDO..","...ORRRRRRDDO...","....ORRRRDDO....",".....OORROO.....","......OOOO......"] },
+  potato: { name: 'Kentang', season: 'Spring', days: 3, seedPrice: 25, sellPrice: 70, palette: { O: '#111', L: '#d97706', M: '#b45309', D: '#78350f' }, art: [".....OOOOOO.....","...OOLLLLLLOO...","..OLLLLMMLLLLOO.",".OLLMLLLLMMLLLO.",".OLLLMMLLLLLLDO.",".OLLLLLLMMLLLDO.","..OLLMMLLLLDDO..","...OOLLLLDDOO...",".....OOOOOO....."] },
+  pea: { name: 'Kacang Polong', season: 'Spring', days: 4, seedPrice: 40, sellPrice: 110, palette: { O: '#111', G: '#16a34a', L: '#4ade80' }, art: ["..........OOO...","........OOGGGO..","......OOGLLLGGO.","....OOGLLGLLGGO.","..OOGLLGLLGGOO..",".OGLLGLLGGOO....",".OGGLLGGOO......","..OOOOOO........"] },
+  garlic: { name: 'Bawang Putih', season: 'Spring', days: 2, seedPrice: 20, sellPrice: 55, palette: { O: '#111', W: '#f8fafc', S: '#cbd5e1', P: '#d8b4fe' }, art: ["......OOOO......",".....OWWWWO.....","....OWSWWSWO....","...OWSWWWWSWO...","..OWSWWWWWWSWO..",".OWSWWWPWWWWWSO.",".OWSWWWPWWWWWSO.","..OSSSSSSSSSSO..","...OOOOOOOOOO..."] },
+  watermelon: { name: 'Semangka', season: 'Summer', days: 5, seedPrice: 60, sellPrice: 175, palette: { O: '#111', G: '#22c55e', D: '#14532d', L: '#86efac' }, art: [".....OOOOOO.....","...OOGGGGGGOO...","..OGDGGDGGDGGO..",".OGLDGGDGGDGLGO.",".OGDGGDGGDGGDGO.",".OGDGGDGGDGGDGO.",".OGDGGDGGDGGDGO.","..OGDGGDGGDGGO..","...OODDDDDDOO...",".....OOOOOO....."] },
+  corn: { name: 'Jagung', season: 'Summer', days: 4, seedPrice: 45, sellPrice: 125, palette: { O: '#111', Y: '#facc15', D: '#ca8a04', G: '#16a34a', L: '#4ade80' }, art: [".....OOOOOO.....","....OYYYYYYO....","...OYYDYYDYYO...","..OYYYYYYYYYYO..",".OGOOYYDYYDOOGO.",".OGLOYYYYYYOLGO.",".OGLLOOYYOOLLGO.","..OGGLLLLLLGGO..","...OOGGGGGGOO...",".....OOOOOO....."] },
+  tomato: { name: 'Tomat', season: 'Summer', days: 3, seedPrice: 35, sellPrice: 95, palette: { O: '#111', R: '#ef4444', D: '#991b1b', G: '#16a34a', W: '#fca5a5' }, art: [".....OOGGOO.....","...OOGGGGGGOO...","..ORROOGGOORRO..",".ORWRRRRRRRRRDO.",".ORRRRRRRRRRRDO.",".ORRRRRRRRRRRDO.","..ORRRRRRRRRDO..","...OODDDDDDOO...",".....OOOOOO....."] },
+  pineapple: { name: 'Nanas', season: 'Summer', days: 5, seedPrice: 70, sellPrice: 200, palette: { O: '#111', G: '#15803d', L: '#4ade80', Y: '#f59e0b', D: '#b45309' }, art: ["....OO.OO.OO....","...OGGLGGLGGO...","....OOGGGGOO....","...OOYYYYYYOO...","..OYYDYYYYDYYO..","..OYYYYDYYYYYO..","..OYYDYYYYDYYO..","..OYYYYDYYYYYO..","...OODDDDDDOO...",".....OOOOOO....."] },
+  grape: { name: 'Anggur', season: 'Autumn', days: 4, seedPrice: 50, sellPrice: 140, palette: { O: '#111', P: '#7e22ce', L: '#a855f7', G: '#16a34a' }, art: [".....OOGGOO.....","....OGGGGGGO....","...OOPPOOPPO....","..OPLPOPLPOPLO..","..OPPPOPPPOPPO..","...OPLPOPLPOO...","....OPPPOPPO....",".....OPLPOO.....","......OOOO......"] },
+  eggplant: { name: 'Terong', season: 'Autumn', days: 3, seedPrice: 35, sellPrice: 95, palette: { O: '#111', P: '#6b21a8', L: '#9333ea', G: '#16a34a' }, art: [".......OOGGO....","......OGGGGO....",".....OOPPPPO....","....OPLPPPPO....","...OPLPPPPPO....","..OPLPPPPPPO....",".OPLPPPPPOO.....",".OPPPPPOO.......","..OOOOO........."] },
+  carrot: { name: 'Wortel', season: 'Autumn', days: 2, seedPrice: 25, sellPrice: 70, palette: { O: '#111', R: '#f97316', D: '#c2410c', G: '#16a34a' }, art: ["........OOGGO...",".......OGGGGO...","......OORROO....",".....ORRDRRO....","....ORRRRRRO....","...ORRDRROO.....","..ORRRROO.......",".ORRROO.........","..OOO..........."] },
+  apple: { name: 'Apel Merah', season: 'Autumn', days: 4, seedPrice: 55, sellPrice: 155, palette: { O: '#111', R: '#dc2626', D: '#991b1b', L: '#f87171', G: '#16a34a' }, art: ["......OOGGO.....",".....OGGGO......","...OORROORROO...","..ORLRRRRRRRDO..",".ORLRRRRRRRRRDO.",".ORRRRRRRRRRRDO.",".ORRRRRRRRRRRDO.","..ORRRRRRRRRDO..","...OODDDDDDOO...",".....OOOOOO....."] },
+  turnip: { name: 'Lobak Salju', season: 'Winter', days: 3, seedPrice: 40, sellPrice: 115, palette: { O: '#111', W: '#f8fafc', P: '#e9d5ff', G: '#16a34a' }, art: [".....OOGGOO.....","....OGGGGGGO....",".....OOGGOO.....","...OOPPPPPPOO...","..OPWWWWWWWWPO..","..OPWWWWWWWWPO..","...OPWWWWWWPO...","....OPWWWWPO....",".....OOWWOO.....","......OOOO......"] },
+  mushroom: { name: 'Jamur Salju', season: 'Winter', days: 2, seedPrice: 30, sellPrice: 85, palette: { O: '#111', B: '#92400e', L: '#b45309', W: '#fef3c7' }, art: ["....OOOOOOOO....","..OOBBBBBBBBOO..",".OBBLBBBBBLBBBO.","OBBBBBBBBBBBBBBO","OOBBBBBBBBBBBBOO","..OOOOWWWWOOOO..","....OWWWWWWO....","....OWWWWWWO....",".....OOOOOO....."] },
+  onion: { name: 'Bawang Merah', season: 'Winter', days: 3, seedPrice: 35, sellPrice: 100, palette: { O: '#111', P: '#9d174d', L: '#db2777', D: '#500724' }, art: ["......OOOO......",".....OPPPPO.....","....OPLPPPLO....","...OPLPPPPPLO...","..OPLPPPPPPPLO..","..OPLPPPPPPPLO..","...OPLPPPPPLO...","....OODDDDOO....","......OOOO......"] },
+  peanut: { name: 'Kacang Tanah', season: 'Winter', days: 4, seedPrice: 45, sellPrice: 130, palette: { O: '#111', L: '#eab308', M: '#ca8a04', D: '#854d0e' }, art: [".......OOOO.....","......OLLLLOO...",".....OLLMMLLLO..","....OOLLMMLLOO..","...OLLLLMMLLO...","..OLLMMLLLLOO...","..OLLLLLLOO.....","...OOOOOO......."] }
+};
+
+// ============================================================================
+// 1B. DATABASE 16 MONSTER MUTASI TANAMAN (SESUAI GAMBAR SPRITE SHEET MONSTER)
+// ============================================================================
+const CROP_MONSTERS_DB = {
+  strawberry: {
+    name: 'Devil Strawberry',
+    hp: 90, atk: 14, speed: 2.4, reward: 160,
+    palette: { O: '#111', R: '#ef4444', D: '#991b1b', G: '#22c55e', Y: '#facc15', S: '#94a3b8' },
+    art: [
+      "....OO....OO....",
+      "...OYYO..OYYO...",
+      "....OOGGGGOO..O.",
+      "...OORRRRRROO.S.",
+      "..OROYRRRROROS..",
+      "..ORRRRRRRRROO..",
+      "..ORRRRRRRRRO...",
+      "...ORRRRRRRO....",
+      "....ORRRRRO.....",
+      "....OO...OO.....",
+      "...OO.....OO...."
+    ]
+  },
+  watermelon: {
+    name: 'Watermelon Beast',
+    hp: 180, atk: 22, speed: 1.2, reward: 320,
+    palette: { O: '#111', G: '#22c55e', D: '#14532d', R: '#ef4444', W: '#ffffff' },
+    art: [
+      ".....OOOOOO.....",
+      "...OOGGGGGGOO...",
+      "..OGDGGDGGDGGO..",
+      ".OGDGGGGGGGGDGO.",
+      ".OGOYGGGGGGYOGO.",
+      ".OGGGOOOOOOGGGO.",
+      ".OGGOWRRRRWOGGO.",
+      "..OGGWWWWWWGGO..",
+      ".OO.OODDDDOO.OO.",
+      "OO...OO..OO...OO"
+    ]
+  },
+  corn: {
+    name: 'Corn Warrior',
+    hp: 130, atk: 16, speed: 1.7, reward: 220,
+    palette: { O: '#111', Y: '#facc15', D: '#ca8a04', G: '#16a34a', L: '#4ade80', R: '#ef4444' },
+    art: [
+      ".....OOOOOO.....",
+      "....OYYYYYYO....",
+      "...OYOYDYYOYO...",
+      "..OYYYYYYYYYYO..",
+      ".OGOOYYDYYDOOGO.",
+      ".OGLOOOOOOOOLGO.",
+      ".OGLLOOOOOOLLGO.",
+      "..OGGLLLLLLGGO..",
+      "...OO.OOOO.OO...",
+      "..OO........OO.."
+    ]
+  },
+  tomato: {
+    name: 'Lava Tomato',
+    hp: 110, atk: 18, speed: 1.6, reward: 190,
+    palette: { O: '#111', R: '#ef4444', F: '#f97316', Y: '#facc15', G: '#16a34a' },
+    art: [
+      ".....OOGGOO.....",
+      "...OOGGGGGGOO...",
+      "..ORRRRRRRRRRO..",
+      ".OROYRRRRRRYORO.",
+      ".ORRRRRRRRRRRRO.",
+      ".ORRRROOOORRRRO.",
+      "..ORRRRRRRRRRO..",
+      ".OFFYYYYYYYYFFO.",
+      "OFFO.OFFFO.OFFO."
+    ]
+  },
+  pineapple: {
+    name: 'Pineapple Golem',
+    hp: 210, atk: 24, speed: 1.1, reward: 380,
+    palette: { O: '#111', G: '#15803d', L: '#4ade80', Y: '#f59e0b', D: '#b45309', S: '#cbd5e1' },
+    art: [
+      "...OO.OOOO.OO...",
+      "..OGGLGGGGLGGO..",
+      "...OOYYYYYYOO...",
+      ".OSOYYDYYDYYOSO.",
+      ".OSOYOYDDYOYOSO.",
+      "..OYYYYDYYYYYO..",
+      "..OYYDYYYYDYYO..",
+      "...OODDDDDDOO...",
+      "..OOO......OOO..",
+      ".OOOO......OOOO."
+    ]
+  },
+  grape: {
+    name: 'Tentacle Grape',
+    hp: 125, atk: 17, speed: 1.8, reward: 230,
+    palette: { O: '#111', P: '#7e22ce', L: '#a855f7', G: '#16a34a', Y: '#fef08a' },
+    art: [
+      ".....OOGGOO.....",
+      "....OGGGGGGO....",
+      "...OOPPOOPPO....",
+      "..OPLPOPLPOPLO..",
+      "..OPOYPPPPYOPO..",
+      "...OPLPOPLPOO...",
+      "..OP.OPPPPO.PO..",
+      ".OP..OP..PO..PO.",
+      "OO..OO....OO..OO"
+    ]
+  },
+  eggplant: {
+    name: 'Eggplant Imp',
+    hp: 95, atk: 15, speed: 2.3, reward: 175,
+    palette: { O: '#111', P: '#6b21a8', L: '#9333ea', G: '#16a34a', R: '#ef4444' },
+    art: [
+      ".......OOGGO....",
+      "......OGGGGO....",
+      ".....OOPPPPO....",
+      "....OPLPPPPO....",
+      "...OPLORPPORPO..",
+      "..OPLPPPPPPPO...",
+      ".OO.OPLPPPPOO...",
+      "OO...OPPPPO.OO..",
+      ".....OO..OO....."
+    ]
+  },
+  carrot: {
+    name: 'Root Carrot',
+    hp: 85, atk: 13, speed: 2.6, reward: 150,
+    palette: { O: '#111', R: '#f97316', D: '#c2410c', G: '#16a34a', W: '#ffffff' },
+    art: [
+      ".......OOGGO....",
+      "......OGGGGO....",
+      ".....OORRRRO....",
+      "....ORORRRORO...",
+      "....ORRRRRRO....",
+      ".....ORRDRRO....",
+      "......ORRRO.....",
+      ".....OO..OO.....",
+      "....OO....OO...."
+    ]
+  },
+  apple: {
+    name: 'Fanged Apple',
+    hp: 140, atk: 20, speed: 1.9, reward: 250,
+    palette: { O: '#111', R: '#dc2626', D: '#991b1b', G: '#16a34a', W: '#ffffff' },
+    art: [
+      "......OOGGO.....",
+      ".....OGGGO......",
+      "...OORROORROO...",
+      "..OROYRRRRRYORO.",
+      ".ORRRRRRRRRRRRO.",
+      ".ORROOOOOOOORRO.",
+      ".ORROWWRRWWRWRO.",
+      "..ORRRRRRRRRDO..",
+      "...OO.OOOO.OO...",
+      "..OO........OO.."
+    ]
+  },
+  potato: {
+    name: 'Rocky Potato',
+    hp: 150, atk: 15, speed: 1.3, reward: 210,
+    palette: { O: '#111', L: '#d97706', M: '#b45309', D: '#78350f', Y: '#fef08a' },
+    art: [
+      ".....OOOOOO.....",
+      "...OOLLLLLLOO...",
+      "..OLLLLMMLLLLOO.",
+      ".OLLMOYLLMOYLLO.",
+      ".OLLLMMLLLLLLDO.",
+      ".OLLMOOOOOOLLDO.",
+      "..OLLMMLLLLDDO..",
+      "...OO.OOOO.OO...",
+      "..OOO......OOO.."
+    ]
+  },
+  pea: {
+    name: 'Pea Pod Hydra',
+    hp: 105, atk: 16, speed: 2.1, reward: 185,
+    palette: { O: '#111', G: '#16a34a', L: '#4ade80', R: '#ef4444', W: '#ffffff' },
+    art: [
+      "........OOOOO...",
+      ".......OGLLWGO..",
+      "......OOGORROO..",
+      "....OOGLLLGGO...",
+      "..OOGLLGLLGGO...",
+      ".OGLLGLLGGOO....",
+      ".OGGLLGGOO......",
+      "..OO..OO........"
+    ]
+  },
+  garlic: {
+    name: 'Psychic Garlic',
+    hp: 115, atk: 19, speed: 1.5, reward: 200,
+    palette: { O: '#111', W: '#f8fafc', S: '#cbd5e1', A: '#86efac', P: '#c084fc' },
+    art: [
+      ".....AAOOOOAA...",
+      "....AAOWWWWOAA..",
+      "...AAOWSWWSWOAA.",
+      "..AAOWOPWWPOWOAA",
+      ".AAOWSWWWWWWSWOA",
+      ".AAOWSWWPWWWSWOA",
+      "..AAOSSSSSSSSOAA",
+      "...AAOOOOOOOOAA."
+    ]
+  },
+  turnip: {
+    name: 'Frost Turnip',
+    hp: 135, atk: 17, speed: 1.6, reward: 225,
+    palette: { O: '#111', W: '#f8fafc', P: '#e9d5ff', G: '#16a34a', B: '#38bdf8' },
+    art: [
+      ".....OOGGOO.....",
+      "....OGGGGGGO....",
+      "...OOPPPPPPOO...",
+      "..OPOBWWWWBOPO..",
+      "..OPWWWWWWWWPO..",
+      "...OPWOOOOOWPO..",
+      "....OPWWWWPO....",
+      "....OO.OO.OO....",
+      "...OO..OO..OO..."
+    ]
+  },
+  mushroom: {
+    name: 'Toadstool Brute',
+    hp: 120, atk: 16, speed: 1.5, reward: 195,
+    palette: { O: '#111', R: '#dc2626', W: '#fef3c7', S: '#fde68a', G: '#4ade80' },
+    art: [
+      "....OOOOOOOO....",
+      "..OORWRRRRWROO..",
+      ".ORRRRRRRRRRRRO.",
+      "ORWRRRRRRRRRRWRO",
+      "OORRRRRRRRRRRROO",
+      "..OOOOSOOOSOOO..",
+      "....OSSSSSSSO...",
+      "....OSSSSSSSO...",
+      "...OO..OO..OO..."
+    ]
+  },
+  onion: {
+    name: 'Toxic Onion',
+    hp: 100, atk: 18, speed: 1.8, reward: 180,
+    palette: { O: '#111', P: '#9d174d', L: '#db2777', T: '#38bdf8', D: '#500724' },
+    art: [
+      "......OOOO......",
+      ".....OPPPPO.....",
+      "....OPLPPPLO....",
+      "...OPOPPPPOPO...",
+      "..OPLTPLPPLTPO..",
+      "..OPLTPLPPLTPO..",
+      "...OPLPPPPPLO...",
+      "....OO.OO.OO....",
+      "...OO......OO..."
+    ]
+  },
+  peanut: {
+    name: 'Twin Peanuts',
+    hp: 110, atk: 15, speed: 2.0, reward: 190,
+    palette: { O: '#111', L: '#eab308', M: '#ca8a04', D: '#854d0e', R: '#ef4444' },
+    art: [
+      "......OOOO......",
+      ".....OLLLLOO....",
+      "....OLORMLORO...",
+      "....OOLLMMLLOO..",
+      "...OLLLLMMLLO...",
+      "..OLLMMLLLLOO...",
+      "..OO.OOOO.OO....",
+      ".OO........OO..."
+    ]
+  }
+};
+
+function buildCropSprites() {
+  Object.keys(CROPS_DB).forEach(key => {
+    const c = CROPS_DB[key];
+    SPRITES['crop_' + key] = createPixelCanvas(16, 13, ctx => {
+      drawMatrix(ctx, c.art, c.palette, 1);
+    });
+  });
+
+  Object.keys(CROP_MONSTERS_DB).forEach(key => {
+    const m = CROP_MONSTERS_DB[key];
+    SPRITES['monster_' + key] = createPixelCanvas(16, 12, ctx => {
+      drawMatrix(ctx, m.art, m.palette, 1);
+    });
+  });
+
+  SPRITES['stage_0'] = createPixelCanvas(16, 16, ctx => {
+    ctx.fillStyle = '#fde047';
+    ctx.fillRect(5, 9, 2, 2);
+    ctx.fillRect(9, 10, 2, 2);
+    ctx.fillRect(7, 7, 2, 2);
+  });
+
+  SPRITES['stage_1'] = createPixelCanvas(16, 16, ctx => {
+    ctx.fillStyle = '#14532d';
+    ctx.fillRect(7, 8, 2, 6);
+    ctx.fillStyle = '#4ade80';
+    ctx.fillRect(5, 7, 2, 2);
+    ctx.fillRect(9, 6, 2, 2);
+  });
+
+  SPRITES['stage_2'] = createPixelCanvas(16, 16, ctx => {
+    ctx.fillStyle = '#14532d';
+    ctx.fillRect(7, 5, 2, 9);
+    ctx.fillStyle = '#22c55e';
+    ctx.fillRect(4, 6, 3, 3);
+    ctx.fillRect(9, 5, 3, 3);
+    ctx.fillRect(5, 9, 2, 2);
+    ctx.fillRect(9, 9, 2, 2);
+  });
+}
+
+// ============================================================================
+// 2. MUSIM, ZONA LAHAN & STATE UTAMA GAME
+// ============================================================================
+const SEASONS = [
+  { id: 'Spring', name: 'Musim Semi 🌸', color: '#4ade80', ground: '#3b6e38' },
+  { id: 'Summer', name: 'Musim Panas ☀️', color: '#facc15', ground: '#4d7c2c' },
+  { id: 'Autumn', name: 'Musim Gugur 🍂', color: '#fb923c', ground: '#78552b' },
+  { id: 'Winter', name: 'Musim Dingin ❄️', color: '#38bdf8', ground: '#cbd5e1' }
+];
+
+const LAND_ZONES = [
+  { id: 0, name: 'Lahan Utama (Sisa Aset)', x: 6, y: 6, w: 4, h: 3, price: 0, unlocked: true },
+  { id: 1, name: 'Lahan Timur', x: 12, y: 6, w: 4, h: 3, price: 600, unlocked: false },
+  { id: 2, name: 'Lahan Selatan', x: 6, y: 11, w: 4, h: 3, price: 1400, unlocked: false },
+  { id: 3, name: 'Perkebunan Utama NEO', x: 12, y: 11, w: 4, h: 3, price: 3000, unlocked: false }
+];
+
+const SEED_BOX_POS = { tx: 4, ty: 6 };
+const WORKER_HIRE_COST = 350;
+const TAX_RATE = 0.30; // Pajak penjualan 30%
+
+// Katalog Pedang & Baju Zirah di Toko
+const WEAPONS_DB = {
+  iron_sword: { id: 'iron_sword', name: 'Pedang Besi', price: 120, atk: 20, color: '#cbd5e1' },
+  steel_sword: { id: 'steel_sword', name: 'Pedang Baja', price: 320, atk: 42, color: '#38bdf8' },
+  neo_dragon_sword: { id: 'neo_dragon_sword', name: 'Pedang Naga NEO', price: 680, atk: 75, color: '#f43f5e' }
+};
+
+const ARMORS_DB = {
+  leather_armor: { id: 'leather_armor', name: 'Zirah Kulit', price: 110, def: 14, color: '#b45309' },
+  steel_armor: { id: 'steel_armor', name: 'Zirah Baja', price: 300, def: 28, color: '#94a3b8' },
+  neo_titanium_armor: { id: 'neo_titanium_armor', name: 'Zirah Titanium NEO', price: 650, def: 52, color: '#a855f7' }
+};
+
+function createAiFarmerState(id, label, spriteId, startX, startY) {
+  return {
+    id,
+    label,
+    hired: false,
+    spriteId,
+    x: startX,
+    y: startY,
+    vx: 0,
+    vy: 0,
+    animTimer: 0,
+    animFrame: 0,
+    hp: 100,
+    maxHp: 100,
+    weaponId: null,
+    armorId: null,
+    state: 'IDLE',
+    targetTileKey: null,
+    targetX: startX,
+    targetY: startY,
+    carryingCrop: null,
+    actionTimer: 0,
+    attackCooldown: 0,
+    statusLabel: 'Siaga'
+  };
+}
+
+const GAME = {
+  state: 'LOGO',
+  playerName: 'Bos Muda',
+  charId: 'mayor',
+  money: 450,
+  day: 1,
+  seasonIdx: 0,
+  timeMinutes: 360,
+  px: 7.5,
+  py: 4.5,
+  vx: 0,
+  vy: 0,
+  dir: 'down',
+  animTimer: 0,
+  animFrame: 0,
+  playerHp: 100,
+  playerMaxHp: 100,
+  playerAttackCooldown: 0,
+  ownedWeapons: [],
+  ownedArmors: [],
+  playerWeaponId: null,
+  playerArmorId: null,
+  mapW: 22,
+  mapH: 18,
+  tiles: {},
+  monsters: [],
+  selectedTool: 'hoe',
+  seeds: { strawberry: 3, potato: 2 },
+  seedBox: {},
+  bag: [],
+  keys: {},
+  touchDir: null,
+  camX: 0,
+  camY: 0,
+  loopStarted: false,
+  toastTimeout: null,
+  aiGrowthTimer: 0,
+  aiLogs: ['Sistem 2 Petani AI (Semua Lahan Terbuka) & 16 Monster Tanaman siap.'],
+  workers: [
+    createAiFarmerState(1, 'Petani AI #1', 'farmer', 5.0, 5.2),
+    createAiFarmerState(2, 'Petani AI #2', 'gardener', 10.5, 5.2)
+  ]
+};
+
+// ============================================================================
+// 3. INISIALISASI, PEMILIHAN KARAKTER & ANIMASI CERITA
+// ============================================================================
+window.addEventListener('load', () => {
+  try {
+    buildCharacterSprites();
+    buildCropSprites();
+    renderCharacterSelector();
+    resizeCanvas();
+    bindInputListeners();
+
+    setTimeout(() => {
+      const logoEl = document.getElementById('screenLogo');
+      const setupEl = document.getElementById('screenSetup');
+      if (logoEl) logoEl.classList.add('hidden');
+      if (setupEl) setupEl.classList.remove('hidden');
+      GAME.state = 'SETUP';
+    }, 2000);
+  } catch (err) {
+    console.error('Error saat memuat game:', err);
+    const statusEl = document.getElementById('loadingStatus');
+    if (statusEl) statusEl.textContent = 'Gagal memuat aset, silakan muat ulang.';
+  }
+});
+
+function renderCharacterSelector() {
+  const grid = document.getElementById('charGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  CHARACTER_DEFS.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'char-item' + (GAME.charId === c.id ? ' selected' : '');
+    div.addEventListener('click', () => {
+      GAME.charId = c.id;
+      renderCharacterSelector();
+    });
+
+    const preview = document.createElement('canvas');
+    preview.width = 44;
+    preview.height = 38;
+    const pctx = preview.getContext('2d');
+    pctx.imageSmoothingEnabled = false;
+    if (SPRITES[c.id] && SPRITES[c.id][0]) {
+      pctx.drawImage(SPRITES[c.id][0], 0, 0, 44, 38);
+    }
+
+    const label = document.createElement('span');
+    label.textContent = c.name;
+
+    div.appendChild(preview);
+    div.appendChild(label);
+    grid.appendChild(div);
+  });
+}
+
+let storyStep = 0;
+let storyAnimId = null;
+
+function startStoryCutscene() {
+  const inputName = document.getElementById('playerNameInput');
+  if (inputName && inputName.value.trim()) {
+    GAME.playerName = inputName.value.trim();
+  }
+
+  document.getElementById('screenSetup').classList.add('hidden');
+  document.getElementById('screenStory').classList.remove('hidden');
+  GAME.state = 'STORY';
+  storyStep = 0;
+  updateStoryText();
+  runStoryAnimation();
+}
+
+function getStoryScripts() {
+  return [
+    `Dahulu, ${GAME.playerName} adalah CEO & Bos Besar dari perusahaan raksasa NEO CORP yang sukses dan kaya raya.`,
+    `Namun, jajaran direksi diam-diam melakukan KORUPSI besar-besaran dan kabur membawa seluruh kas perusahaan!`,
+    `NEO CORP dinyatakan BANGKRUT. Seluruh gedung disita bank. Yang tersisa hanyalah $450 uang tabungan dan 1 petak lahan tua di desa.`,
+    `Kini saatnya ${GAME.playerName} bangkit dari nol! Bertani sesuai musim, sewa Petani AI, perluas lahan, dan bangun kembali kejayaan NEO!`
+  ];
+}
+
+function updateStoryText() {
+  const scripts = getStoryScripts();
+  const textEl = document.getElementById('storyText');
+  const btnEl = document.getElementById('storyNextBtn');
+  if (textEl) textEl.textContent = scripts[storyStep];
+  if (btnEl) btnEl.textContent = storyStep === scripts.length - 1 ? 'MULAI BERTANI 🌱' : 'Lanjut ▶';
+}
+
+function nextStoryStep() {
+  storyStep++;
+  if (storyStep >= getStoryScripts().length) {
+    if (storyAnimId) cancelAnimationFrame(storyAnimId);
+    document.getElementById('screenStory').classList.add('hidden');
+    startMainGame();
+  } else {
+    updateStoryText();
+  }
+}
+
+function runStoryAnimation() {
+  if (storyAnimId) cancelAnimationFrame(storyAnimId);
+  const sc = document.getElementById('storyCanvas');
+  if (!sc) return;
+  const sctx = sc.getContext('2d');
+  sctx.imageSmoothingEnabled = false;
+  let frame = 0;
+
+  function loop() {
+    frame++;
+    sctx.clearRect(0, 0, sc.width, sc.height);
+
+    if (storyStep === 0) {
+      sctx.fillStyle = '#0f172a';
+      sctx.fillRect(0, 0, 340, 220);
+      sctx.fillStyle = '#1e293b';
+      sctx.fillRect(100, 34, 140, 166);
+      sctx.fillStyle = '#38bdf8';
+      for (let y = 55; y < 180; y += 22) {
+        for (let x = 115; x < 225; x += 25) {
+          sctx.fillRect(x, y, 14, 12);
+        }
+      }
+      sctx.fillStyle = '#00f2fe';
+      sctx.font = 'bold 16px Courier New';
+      sctx.fillText('NEO CORP HQ', 112, 24);
+      if (SPRITES[GAME.charId]) {
+        sctx.drawImage(SPRITES[GAME.charId][Math.floor(frame / 15) % 2], 148, 152, 44, 38);
+      }
+    } else if (storyStep === 1) {
+      sctx.fillStyle = '#1e1b2e';
+      sctx.fillRect(0, 0, 340, 220);
+      const thiefX = 155 + (frame % 130);
+      sctx.fillStyle = '#ef4444';
+      sctx.font = 'bold 14px Courier New';
+      sctx.fillText('⚠️ DANA PERUSAHAAN DIKORUPSI!', 42, 35);
+      sctx.fillStyle = '#000000';
+      sctx.fillRect(thiefX, 140, 26, 42);
+      sctx.fillStyle = '#fbbf24';
+      sctx.beginPath();
+      sctx.arc(thiefX + 32, 160, 11, 0, Math.PI * 2);
+      sctx.fill();
+      sctx.fillStyle = '#000000';
+      sctx.font = 'bold 12px Courier New';
+      sctx.fillText('$', thiefX + 28, 164);
+      if (SPRITES[GAME.charId]) {
+        sctx.drawImage(SPRITES[GAME.charId][0], 65, 145, 44, 38);
+      }
+    } else if (storyStep === 2) {
+      sctx.fillStyle = '#18181b';
+      sctx.fillRect(0, 0, 340, 220);
+      sctx.fillStyle = '#3f3f46';
+      sctx.fillRect(100, 40, 140, 160);
+      sctx.save();
+      sctx.translate(170, 120);
+      sctx.rotate(-0.2);
+      sctx.fillStyle = '#dc2626';
+      sctx.fillRect(-75, -18, 150, 36);
+      sctx.fillStyle = '#ffffff';
+      sctx.font = 'bold 18px Courier New';
+      sctx.fillText('BANGKRUT', -46, 6);
+      sctx.restore();
+      if (SPRITES[GAME.charId]) {
+        sctx.drawImage(SPRITES[GAME.charId][0], 50, 150, 44, 38);
+      }
+    } else {
+      sctx.fillStyle = '#38bdf8';
+      sctx.fillRect(0, 0, 340, 110);
+      sctx.fillStyle = '#4ade80';
+      sctx.fillRect(0, 110, 340, 110);
+      sctx.fillStyle = '#78350f';
+      sctx.fillRect(120, 135, 110, 60);
+      if (SPRITES[GAME.charId]) {
+        sctx.drawImage(SPRITES[GAME.charId][Math.floor(frame / 15) % 2], 74, 142, 44, 38);
+      }
+      if (SPRITES['crop_strawberry']) sctx.drawImage(SPRITES['crop_strawberry'], 138, 148, 26, 22);
+      if (SPRITES['crop_potato']) sctx.drawImage(SPRITES['crop_potato'], 180, 148, 26, 22);
+    }
+
+    storyAnimId = requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+// ============================================================================
+// 4. LOOP GAMEPLAY 60 FPS, KONTROL & 2 PETANI AI DI SELURUH LAHAN TERBUKA
+// ============================================================================
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const TILE_SIZE = 44;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth || 800;
+  canvas.height = window.innerHeight || 600;
+  ctx.imageSmoothingEnabled = false;
+}
+window.addEventListener('resize', resizeCanvas);
+
+function bindInputListeners() {
+  window.addEventListener('keydown', e => {
+    GAME.keys[e.key.toLowerCase()] = true;
+    if (GAME.state === 'PLAY' && (e.key === ' ' || e.key === 'Enter')) {
+      performAction();
+    }
+  });
+
+  window.addEventListener('keyup', e => {
+    GAME.keys[e.key.toLowerCase()] = false;
+  });
+
+  document.querySelectorAll('.d-btn').forEach(btn => {
+    const dir = btn.dataset.dir;
+    const onPress = e => {
+      e.preventDefault();
+      GAME.touchDir = dir;
+    };
+    const onRelease = e => {
+      e.preventDefault();
+      if (GAME.touchDir === dir) GAME.touchDir = null;
+    };
+    btn.addEventListener('touchstart', onPress, { passive: false });
+    btn.addEventListener('touchend', onRelease);
+    btn.addEventListener('touchcancel', onRelease);
+    btn.addEventListener('mousedown', onPress);
+    btn.addEventListener('mouseup', onRelease);
+    btn.addEventListener('mouseleave', onRelease);
+  });
+}
+
+function startMainGame() {
+  GAME.state = 'PLAY';
+  GAME.camX = GAME.px * TILE_SIZE - canvas.width / 2;
+  GAME.camY = GAME.py * TILE_SIZE - canvas.height / 2 + 20;
+
+  document.getElementById('hud').classList.remove('hidden');
+  document.getElementById('toolbar').classList.remove('hidden');
+  document.getElementById('controls').classList.remove('hidden');
+  document.getElementById('hudName').textContent = GAME.playerName;
+
+  syncWorkerUI();
+  updateHUD();
+  renderToolbar();
+  showToast(`Selamat datang di lahanmu, ${GAME.playerName}!`);
+
+  if (!GAME.loopStarted) {
+    GAME.loopStarted = true;
+    let lastTime = performance.now();
+
+    function gameLoop(now) {
+      try {
+        const dt = Math.min((now - lastTime) / 1000, 0.05);
+        lastTime = now;
+        if (GAME.state === 'PLAY') {
+          update(dt);
+          render();
+        }
+      } catch (err) {
+        console.error('Error pada game loop:', err);
+      }
+      requestAnimationFrame(gameLoop);
+    }
+
+    requestAnimationFrame(gameLoop);
+  }
+}
+
+function syncWorkerUI() {
+  const btnBox = document.getElementById('btnStorage');
+  const hudWorker = document.getElementById('hudWorker');
+  const hiredCount = GAME.workers.filter(w => w.hired).length;
+
+  if (btnBox) {
+    if (hiredCount > 0) btnBox.classList.remove('hidden');
+    else btnBox.classList.add('hidden');
+  }
+
+  if (hudWorker) {
+    if (hiredCount > 0) {
+      hudWorker.textContent = `${hiredCount}/2 AI Aktif`;
+      hudWorker.className = 'text-emerald-400 font-bold';
+    } else {
+      hudWorker.textContent = '0/2 AI';
+      hudWorker.className = 'text-slate-400';
+    }
+  }
+}
+
+function pushAiLog(msg) {
+  GAME.aiLogs.unshift(`• ${msg}`);
+  if (GAME.aiLogs.length > 14) GAME.aiLogs.pop();
+  const logBox = document.getElementById('aiLogBox');
+  if (logBox && !document.getElementById('modalSeedBox').classList.contains('hidden')) {
+    logBox.innerHTML = GAME.aiLogs.map(line => `<div>${line}</div>`).join('');
+  }
+}
+
+function getCombatStats(weaponId, armorId) {
+  const baseAtk = 14;
+  const wAtk = weaponId && WEAPONS_DB[weaponId] ? WEAPONS_DB[weaponId].atk : 0;
+  const aDef = armorId && ARMORS_DB[armorId] ? ARMORS_DB[armorId].def : 0;
+  return { atk: baseAtk + wAtk, def: aDef };
+}
+
+function spawnMonsterFromTile(tx, ty, cropKey, weightKg) {
+  const mDef = CROP_MONSTERS_DB[cropKey] || CROP_MONSTERS_DB.strawberry;
+  const scaleFactor = 1 + Math.min(1.4, (weightKg || 2) * 0.06);
+  const maxHp = Math.round(mDef.hp * scaleFactor);
+  const atk = Math.round(mDef.atk * (1 + (scaleFactor - 1) * 0.45));
+  const reward = Math.round(mDef.reward * scaleFactor);
+
+  GAME.monsters.push({
+    id: `mon_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    cropKey,
+    name: mDef.name,
+    x: tx + 0.5,
+    y: ty + 0.5,
+    vx: 0,
+    vy: 0,
+    hp: maxHp,
+    maxHp,
+    atk,
+    speed: mDef.speed,
+    reward,
+    hitFlash: 0,
+    attackCooldown: 0
+  });
+
+  showToast(`⚠️ MUTASI MONSTER! ${mDef.name} muncul di (${tx},${ty})!`);
+  pushAiLog(`⚠️ ${mDef.name} bermutasi di petak ${tx},${ty}!`);
+}
+
+function update(dt) {
+  GAME.timeMinutes += dt * 10;
+  if (GAME.timeMinutes >= 1440) {
+    advanceDay();
+  }
+
+  if (GAME.playerAttackCooldown > 0) {
+    GAME.playerAttackCooldown = Math.max(0, GAME.playerAttackCooldown - dt);
+  }
+
+  let ix = 0;
+  let iy = 0;
+  if (GAME.keys['w'] || GAME.keys['arrowup'] || GAME.touchDir === 'up') {
+    iy = -1;
+    GAME.dir = 'up';
+  }
+  if (GAME.keys['s'] || GAME.keys['arrowdown'] || GAME.touchDir === 'down') {
+    iy = 1;
+    GAME.dir = 'down';
+  }
+  if (GAME.keys['a'] || GAME.keys['arrowleft'] || GAME.touchDir === 'left') {
+    ix = -1;
+    GAME.dir = 'left';
+  }
+  if (GAME.keys['d'] || GAME.keys['arrowright'] || GAME.touchDir === 'right') {
+    ix = 1;
+    GAME.dir = 'right';
+  }
+
+  if (ix !== 0 && iy !== 0) {
+    ix *= 0.7071;
+    iy *= 0.7071;
+  }
+
+  const speed = 4.8;
+  const smoothFactor = Math.min(1, 18 * dt);
+  GAME.vx += (ix * speed - GAME.vx) * smoothFactor;
+  GAME.vy += (iy * speed - GAME.vy) * smoothFactor;
+
+  const nextX = GAME.px + GAME.vx * dt;
+  const nextY = GAME.py + GAME.vy * dt;
+  if (nextX > 1.2 && nextX < GAME.mapW - 1.2) GAME.px = nextX;
+  if (nextY > 1.2 && nextY < GAME.mapH - 1.2) GAME.py = nextY;
+
+  if (Math.hypot(GAME.vx, GAME.vy) > 0.25) {
+    GAME.animTimer += dt * 8.5;
+    GAME.animFrame = Math.floor(GAME.animTimer) % 2;
+  } else {
+    GAME.animFrame = 0;
+  }
+
+  // Pertumbuhan bertahap real-time untuk seluruh tanaman yang disiram di SEMUA zona terbuka
+  const anyHired = GAME.workers.some(w => w.hired);
+  if (anyHired) {
+    GAME.aiGrowthTimer += dt;
+    if (GAME.aiGrowthTimer >= 2.2) {
+      GAME.aiGrowthTimer = 0;
+      const currentSeason = SEASONS[GAME.seasonIdx].id;
+
+      LAND_ZONES.forEach(z => {
+        if (!z.unlocked) return;
+        for (let ty = z.y; ty < z.y + z.h; ty++) {
+          for (let tx = z.x; tx < z.x + z.w; tx++) {
+            const key = `${tx},${ty}`;
+            const t = GAME.tiles[key];
+            if (t && t.cropKey && CROPS_DB[t.cropKey] && t.watered) {
+              const crop = CROPS_DB[t.cropKey];
+              if (crop.season === currentSeason && t.daysGrown < crop.days) {
+                t.daysGrown = Math.min(crop.days, t.daysGrown + 1);
+                if (!t.weightKg) rollCropMutationAndWeight(t, t.cropKey);
+
+                if (t.daysGrown >= crop.days && !t.monsterMutated && Math.random() < 0.22) {
+                  t.monsterMutated = true;
+                  const weightNow = t.weightKg || 2.5;
+                  const cKey = t.cropKey;
+                  t.cropKey = null;
+                  t.daysGrown = 0;
+                  t.watered = false;
+                  t.jumbo = false;
+                  t.weightKg = 0;
+                  spawnMonsterFromTile(tx, ty, cKey, weightNow);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // Jalankan loop otonom untuk tiap Petani AI yang disewa di SELURUH zona lahan terbuka
+  GAME.workers.forEach(worker => {
+    if (worker.hired) {
+      updateAiFarmerAcrossAllZones(worker, dt);
+    }
+  });
+
+  // Update Monster Tanaman & Pertarungan
+  updateMonsters(dt);
+
+  const hh = String(Math.floor(GAME.timeMinutes / 60)).padStart(2, '0');
+  const mm = String(Math.floor((GAME.timeMinutes % 60) / 10) * 10).padStart(2, '0');
+  const timeEl = document.getElementById('hudTime');
+  if (timeEl) timeEl.textContent = `${hh}:${mm}`;
+}
+
+/**
+ * Mengambil bibit dari Peti Penyimpanan AI yang cocok dengan musim aktif saat ini.
+ */
+function getSeasonMatchingSeedInBox() {
+  const currentSeason = SEASONS[GAME.seasonIdx].id;
+  const keys = Object.keys(GAME.seedBox);
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i];
+    if ((GAME.seedBox[k] || 0) > 0 && CROPS_DB[k] && CROPS_DB[k].season === currentSeason) {
+      return k;
+    }
+  }
+  return null;
+}
+
+/**
+ * Mengumpulkan seluruh petak di SEMUA zona lahan yang sudah dibeli (Zone 0, 1, 2, 3).
+ */
+function getAllUnlockedTilesList() {
+  const list = [];
+  LAND_ZONES.forEach(z => {
+    if (!z.unlocked) return;
+    for (let ty = z.y; ty < z.y + z.h; ty++) {
+      for (let tx = z.x; tx < z.x + z.w; tx++) {
+        list.push({ tx, ty, key: `${tx},${ty}`, zoneId: z.id });
+      }
+    }
+  });
+  return list;
+}
+
+/**
+ * Memilih tugas berikutnya untuk seorang Petani AI di SELURUH zona lahan yang terbuka,
+ * dengan menghindari petak yang sedang dikerjakan oleh Petani AI lainnya.
+ */
+function findNextTaskAcrossAllUnlockedZones(worker) {
+  const allTiles = getAllUnlockedTilesList();
+  const otherClaimedKeys = new Set(
+    GAME.workers
+      .filter(other => other.hired && other.id !== worker.id && other.targetTileKey)
+      .map(other => other.targetTileKey)
+  );
+
+  // Urutkan berdasarkan jarak terdekat dari posisi AI saat ini agar gerakannya efisien
+  allTiles.sort((a, b) => {
+    const da = Math.hypot(a.tx + 0.5 - worker.x, a.ty + 0.8 - worker.y);
+    const db = Math.hypot(b.tx + 0.5 - worker.x, b.ty + 0.8 - worker.y);
+    return da - db;
+  });
+
+  // 1. Prioritas Panen tanaman matang di zona manapun yang terbuka
+  for (let i = 0; i < allTiles.length; i++) {
+    const item = allTiles[i];
+    if (otherClaimedKeys.has(item.key)) continue;
+    const t = GAME.tiles[item.key];
+    if (t && t.cropKey && CROPS_DB[t.cropKey]) {
+      const crop = CROPS_DB[t.cropKey];
+      if (t.daysGrown >= crop.days) {
+        return { type: 'HARVEST', tx: item.tx, ty: item.ty, key: item.key };
+      }
+    }
+  }
+
+  // 2. Prioritas Siram tanaman yang belum disiram di zona manapun yang terbuka
+  for (let i = 0; i < allTiles.length; i++) {
+    const item = allTiles[i];
+    if (otherClaimedKeys.has(item.key)) continue;
+    const t = GAME.tiles[item.key];
+    if (t && t.cropKey && !t.watered) {
+      return { type: 'WATER', tx: item.tx, ty: item.ty, key: item.key };
+    }
+  }
+
+  // 3. Prioritas Ambil bibit musim ini dari Peti AI & tanam di petak kosong mana pun di SEMUA zona terbuka
+  const availableSeed = getSeasonMatchingSeedInBox();
+  if (availableSeed) {
+    for (let i = 0; i < allTiles.length; i++) {
+      const item = allTiles[i];
+      if (otherClaimedKeys.has(item.key)) continue;
+      const t = GAME.tiles[item.key];
+      if (!t || !t.cropKey) {
+        return { type: 'PLANT', tx: item.tx, ty: item.ty, key: item.key };
+      }
+    }
+  }
+
+  return null;
+}
+
+function findMonsterNear(x, y, radius = 3.0) {
+  let nearest = null;
+  let bestDist = radius;
+  for (let i = 0; i < GAME.monsters.length; i++) {
+    const m = GAME.monsters[i];
+    const d = Math.hypot(m.x - x, m.y - y);
+    if (d <= bestDist) {
+      bestDist = d;
+      nearest = m;
+    }
+  }
+  return nearest;
+}
+
+/**
+ * Loop AI Petani berkelanjutan di SELURUH zona lahan terbuka:
+ * Ambil bibit dari Peti AI -> jalan ke petak kosong di zona mana pun -> cangkul & tanam ->
+ * siram -> lawan monster jika muncul -> panen saat matang -> jual otomatis (potong pajak 30%).
+ */
+function updateAiFarmerAcrossAllZones(w, dt) {
+  if (w.actionTimer > 0) w.actionTimer = Math.max(0, w.actionTimer - dt);
+  if (w.attackCooldown > 0) w.attackCooldown = Math.max(0, w.attackCooldown - dt);
+
+  // Jika ada monster di dekat AI atau di lahan terbuka, AI langsung membantu melawan monster
+  const nearbyMonster = findMonsterNear(w.x, w.y, 4.5);
+  if (nearbyMonster && w.state !== 'FIGHTING') {
+    w.state = 'FIGHTING';
+    w.targetTileKey = null;
+    w.statusLabel = 'Lawan Monster';
+  }
+
+  if (w.state === 'FIGHTING') {
+    if (!nearbyMonster || nearbyMonster.hp <= 0) {
+      w.state = 'IDLE';
+      w.statusLabel = 'Siaga';
+      return;
+    }
+    const diffX = nearbyMonster.x - w.x;
+    const diffY = nearbyMonster.y - w.y;
+    const dist = Math.hypot(diffX, diffY);
+    if (dist > 0.85) {
+      w.vx = (diffX / dist) * 4.0;
+      w.vy = (diffY / dist) * 4.0;
+      w.x += w.vx * dt;
+      w.y += w.vy * dt;
+    } else {
+      w.vx = 0;
+      w.vy = 0;
+      if (w.attackCooldown <= 0) {
+        const stats = getCombatStats(w.weaponId, w.armorId);
+        damageMonster(nearbyMonster, stats.atk, w.label);
+        w.attackCooldown = 0.6;
+      }
+    }
+    return;
+  }
+
+  if (w.state === 'IDLE') {
+    w.targetTileKey = null;
+    const task = findNextTaskAcrossAllUnlockedZones(w);
+    if (task) {
+      w.targetTileKey = task.key;
+      if (task.type === 'HARVEST') {
+        w.targetX = task.tx + 0.5;
+        w.targetY = task.ty + 0.82;
+        w.state = 'HARVEST_WALK';
+        w.statusLabel = `Panen (${task.key})`;
+      } else if (task.type === 'WATER') {
+        w.targetX = task.tx + 0.5;
+        w.targetY = task.ty + 0.82;
+        w.state = 'TO_WATER_PLOT';
+        w.statusLabel = `Siram (${task.key})`;
+      } else if (task.type === 'PLANT') {
+        w.targetX = SEED_BOX_POS.tx + 0.5;
+        w.targetY = SEED_BOX_POS.ty + 1.05;
+        w.state = 'TO_BOX';
+        w.statusLabel = 'Ambil Bibit';
+      }
+    } else {
+      const hasWrongSeasonSeed = Object.keys(GAME.seedBox).some(k => (GAME.seedBox[k] || 0) > 0);
+      w.statusLabel = hasWrongSeasonSeed ? 'Bibit Beda Musim' : 'Tunggu Bibit';
+    }
+  }
+
+  let dx = 0;
+  let dy = 0;
+  const moveSpeed = 4.2;
+  const walking = (w.state === 'TO_BOX' || w.state === 'TO_PLOT' || w.state === 'TO_WATER_PLOT' || w.state === 'HARVEST_WALK');
+
+  if (walking) {
+    const diffX = w.targetX - w.x;
+    const diffY = w.targetY - w.y;
+    const dist = Math.hypot(diffX, diffY);
+
+    if (dist < 0.16) {
+      w.x = w.targetX;
+      w.y = w.targetY;
+      dx = 0;
+      dy = 0;
+
+      if (w.state === 'TO_BOX') {
+        const seedKey = getSeasonMatchingSeedInBox();
+        const destTile = w.targetTileKey ? GAME.tiles[w.targetTileKey] : null;
+        if (seedKey && (GAME.seedBox[seedKey] || 0) > 0 && w.targetTileKey && (!destTile || !destTile.cropKey)) {
+          GAME.seedBox[seedKey]--;
+          if (GAME.seedBox[seedKey] <= 0) delete GAME.seedBox[seedKey];
+          w.carryingCrop = seedKey;
+          const parts = w.targetTileKey.split(',');
+          w.targetX = Number(parts[0]) + 0.5;
+          w.targetY = Number(parts[1]) + 0.82;
+          w.state = 'TO_PLOT';
+          w.statusLabel = `Tanam ${CROPS_DB[seedKey].name}`;
+        } else {
+          w.state = 'IDLE';
+        }
+      } else if (w.state === 'TO_PLOT') {
+        w.state = 'PLANTING';
+        w.actionTimer = 0.16;
+      } else if (w.state === 'TO_WATER_PLOT') {
+        w.state = 'WATERING';
+        w.actionTimer = 0.16;
+      } else if (w.state === 'HARVEST_WALK') {
+        w.state = 'HARVESTING';
+        w.actionTimer = 0.16;
+      }
+    } else {
+      dx = (diffX / dist) * moveSpeed;
+      dy = (diffY / dist) * moveSpeed;
+    }
+  } else if (w.state === 'PLANTING' && w.actionTimer <= 0) {
+    const cropKey = w.carryingCrop;
+    const key = w.targetTileKey;
+    const existing = key ? GAME.tiles[key] : null;
+    if (key && cropKey && CROPS_DB[cropKey] && (!existing || !existing.cropKey)) {
+      GAME.tiles[key] = {
+        tilled: true,
+        watered: true,
+        cropKey,
+        daysGrown: 0,
+        jumbo: false,
+        weightKg: 0,
+        monsterMutated: false
+      };
+      rollCropMutationAndWeight(GAME.tiles[key], cropKey);
+      pushAiLog(`${w.label} menanam ${CROPS_DB[cropKey].name} di petak ${key}.`);
+    } else if (cropKey && CROPS_DB[cropKey]) {
+      // Kembalikan bibit ke peti jika petak sudah terisi
+      GAME.seedBox[cropKey] = (GAME.seedBox[cropKey] || 0) + 1;
+    }
+    w.carryingCrop = null;
+    w.targetTileKey = null;
+    w.state = 'IDLE';
+  } else if (w.state === 'WATERING' && w.actionTimer <= 0) {
+    const tile = w.targetTileKey ? GAME.tiles[w.targetTileKey] : null;
+    if (tile) {
+      tile.tilled = true;
+      tile.watered = true;
+    }
+    w.targetTileKey = null;
+    w.state = 'IDLE';
+  } else if (w.state === 'HARVESTING' && w.actionTimer <= 0) {
+    const tile = w.targetTileKey ? GAME.tiles[w.targetTileKey] : null;
+    if (tile && tile.cropKey && CROPS_DB[tile.cropKey]) {
+      const cropKey = tile.cropKey;
+      const crop = CROPS_DB[cropKey];
+      if (!tile.weightKg) rollCropMutationAndWeight(tile, cropKey);
+      const sale = calculateNetSaleWithTax(cropKey, tile.weightKg, tile.jumbo);
+      GAME.money += sale.net;
+      updateHUD();
+      const jumboTag = tile.jumbo ? ' 🌟JUMBO' : '';
+      pushAiLog(`${w.label} jual ${crop.name}${jumboTag} +$${sale.net} (Pajak 30%: -$${sale.tax})`);
+      showToast(`🤖 ${w.label} jual ${crop.name}${jumboTag} +$${sale.net}`);
+
+      tile.cropKey = null;
+      tile.daysGrown = 0;
+      tile.watered = false;
+      tile.jumbo = false;
+      tile.weightKg = 0;
+      tile.monsterMutated = false;
+    }
+    w.targetTileKey = null;
+    w.state = 'IDLE';
+  }
+
+  const smooth = Math.min(1, 14 * dt);
+  w.vx += (dx - w.vx) * smooth;
+  w.vy += (dy - w.vy) * smooth;
+  w.x += w.vx * dt;
+  w.y += w.vy * dt;
+
+  if (Math.hypot(w.vx, w.vy) > 0.2) {
+    w.animTimer += dt * 8;
+    w.animFrame = Math.floor(w.animTimer) % 2;
+  } else {
+    w.animFrame = 0;
+  }
+}
+
+function updateMonsters(dt) {
+  for (let i = GAME.monsters.length - 1; i >= 0; i--) {
+    const m = GAME.monsters[i];
+    if (m.hitFlash > 0) m.hitFlash = Math.max(0, m.hitFlash - dt * 5);
+    if (m.attackCooldown > 0) m.attackCooldown = Math.max(0, m.attackCooldown - dt);
+
+    let targetEntity = { kind: 'player', x: GAME.px, y: GAME.py, dist: Math.hypot(GAME.px - m.x, GAME.py - m.y) };
+    GAME.workers.forEach(w => {
+      if (w.hired) {
+        const d = Math.hypot(w.x - m.x, w.y - m.y);
+        if (d < targetEntity.dist) {
+          targetEntity = { kind: 'worker', worker: w, x: w.x, y: w.y, dist: d };
+        }
+      }
+    });
+
+    if (targetEntity.dist < 6.0 && targetEntity.dist > 0.75) {
+      const dx = (targetEntity.x - m.x) / targetEntity.dist;
+      const dy = (targetEntity.y - m.y) / targetEntity.dist;
+      m.vx = dx * m.speed;
+      m.vy = dy * m.speed;
+      m.x += m.vx * dt;
+      m.y += m.vy * dt;
+    } else if (targetEntity.dist <= 0.75 && m.attackCooldown <= 0) {
+      m.attackCooldown = 1.1;
+      if (targetEntity.kind === 'player') {
+        const pStats = getCombatStats(GAME.playerWeaponId, GAME.playerArmorId);
+        const dmgTaken = Math.max(2, m.atk - Math.round(pStats.def * 0.4));
+        GAME.playerHp = Math.max(15, GAME.playerHp - dmgTaken);
+        updateHUD();
+        showToast(`💥 ${m.name} menyerangmu (-${dmgTaken} HP)! Tekan AKSI untuk menebas.`);
+      } else if (targetEntity.kind === 'worker') {
+        const w = targetEntity.worker;
+        const wStats = getCombatStats(w.weaponId, w.armorId);
+        const dmgTaken = Math.max(2, m.atk - Math.round(wStats.def * 0.45));
+        w.hp = Math.max(20, w.hp - dmgTaken);
+      }
+    }
+  }
+}
+
+function damageMonster(monster, damage, attackerName) {
+  monster.hp -= damage;
+  monster.hitFlash = 1;
+  if (monster.hp <= 0) {
+    const idx = GAME.monsters.indexOf(monster);
+    if (idx !== -1) GAME.monsters.splice(idx, 1);
+    const tax = Math.max(1, Math.round(monster.reward * TAX_RATE));
+    const netReward = Math.max(1, monster.reward - tax);
+    GAME.money += netReward;
+    updateHUD();
+    showToast(`⚔️ ${attackerName} kalahkan ${monster.name}! +$${netReward} (Pajak -$${tax})`);
+    pushAiLog(`${attackerName} menumbangkan ${monster.name} (+$${netReward} bersih).`);
+  }
+}
+
+function rollCropMutationAndWeight(tile, cropKey) {
+  const crop = CROPS_DB[cropKey];
+  if (!crop) return;
+  const isJumbo = Math.random() < 0.25;
+  const baseMin = isJumbo ? 8.0 : 0.8;
+  const baseMax = isJumbo ? 20.0 : 4.5;
+  const weightKg = Number((baseMin + Math.random() * (baseMax - baseMin) + crop.days * 0.45).toFixed(1));
+  tile.jumbo = isJumbo;
+  tile.weightKg = weightKg;
+}
+
+function getChunkLabel(weightKg, isJumbo) {
+  if (isJumbo || weightKg >= 8.0) return 'MUTASI JUMBO';
+  if (weightKg >= 4.5) return 'Chunk Bongsor';
+  if (weightKg >= 2.5) return 'Chunk Padat';
+  return 'Chunk Normal';
+}
+
+function calculateCropGrossPrice(cropKey, weightKg, isJumbo) {
+  const crop = CROPS_DB[cropKey];
+  if (!crop) return 15;
+  const weightMultiplier = 0.55 + weightKg * 0.34;
+  const jumboBonus = isJumbo ? 1.65 : 1.0;
+  return Math.max(12, Math.round(crop.sellPrice * weightMultiplier * jumboBonus));
+}
+
+function calculateNetSaleWithTax(cropKey, weightKg, isJumbo) {
+  const gross = calculateCropGrossPrice(cropKey, weightKg, isJumbo);
+  const tax = Math.max(1, Math.round(gross * TAX_RATE));
+  const net = Math.max(1, gross - tax);
+  return { gross, tax, net };
+}
+
+function getZoneAt(tx, ty) {
+  return LAND_ZONES.find(z => tx >= z.x && tx < z.x + z.w && ty >= z.y && ty < z.y + z.h);
+}
+
+function getTargetTile() {
+  let tx = Math.floor(GAME.px);
+  let ty = Math.floor(GAME.py);
+  if (GAME.dir === 'up') ty -= 1;
+  if (GAME.dir === 'down') ty += 1;
+  if (GAME.dir === 'left') tx -= 1;
+  if (GAME.dir === 'right') tx += 1;
+  return { tx, ty };
+}
+
+function performAction() {
+  const nearbyEnemy = findMonsterNear(GAME.px, GAME.py, 1.85);
+  if (nearbyEnemy && GAME.playerAttackCooldown <= 0) {
+    const pStats = getCombatStats(GAME.playerWeaponId, GAME.playerArmorId);
+    GAME.playerAttackCooldown = 0.32;
+    damageMonster(nearbyEnemy, pStats.atk, GAME.playerName);
+    return;
+  }
+
+  const { tx, ty } = getTargetTile();
+  const anyHired = GAME.workers.some(w => w.hired);
+
+  if (anyHired && Math.hypot(tx - SEED_BOX_POS.tx, ty - SEED_BOX_POS.ty) <= 1.2) {
+    openSeedBox();
+    return;
+  }
+
+  const zone = getZoneAt(tx, ty);
+  if (!zone) {
+    showToast('Arahkan karakter ke petak lahan, monster, atau Peti AI!');
+    return;
+  }
+  if (!zone.unlocked) {
+    showToast(`Lahan terkunci! Beli "${zone.name}" ($${zone.price}) di Toko.`);
+    return;
+  }
+
+  const key = `${tx},${ty}`;
+  if (!GAME.tiles[key]) {
+    GAME.tiles[key] = { tilled: false, watered: false, cropKey: null, daysGrown: 0, jumbo: false, weightKg: 0, monsterMutated: false };
+  }
+  const tile = GAME.tiles[key];
+  const tool = GAME.selectedTool;
+
+  if (tile.cropKey && CROPS_DB[tile.cropKey]) {
+    const crop = CROPS_DB[tile.cropKey];
+    if (tile.daysGrown >= crop.days) {
+      if (!tile.weightKg) rollCropMutationAndWeight(tile, tile.cropKey);
+
+      if (!tile.monsterMutated && Math.random() < 0.24) {
+        tile.monsterMutated = true;
+        const wNow = tile.weightKg;
+        const cKey = tile.cropKey;
+        tile.cropKey = null;
+        tile.daysGrown = 0;
+        tile.watered = false;
+        tile.jumbo = false;
+        tile.weightKg = 0;
+        spawnMonsterFromTile(tx, ty, cKey, wNow);
+        return;
+      }
+
+      const sale = calculateNetSaleWithTax(tile.cropKey, tile.weightKg, tile.jumbo);
+      GAME.bag.push({
+        id: `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        cropKey: tile.cropKey,
+        name: crop.name,
+        weightKg: tile.weightKg,
+        jumbo: tile.jumbo,
+        chunkLabel: getChunkLabel(tile.weightKg, tile.jumbo),
+        grossPrice: sale.gross,
+        tax: sale.tax,
+        price: sale.net
+      });
+      const tag = tile.jumbo ? ' 🌟JUMBO!' : '';
+      showToast(`Panen ${crop.name}${tag} (${tile.weightKg} kg) -> Bersih $${sale.net}`);
+      tile.cropKey = null;
+      tile.daysGrown = 0;
+      tile.watered = false;
+      tile.jumbo = false;
+      tile.weightKg = 0;
+      tile.monsterMutated = false;
+      return;
+    }
+  }
+
+  if (tool === 'hoe') {
+    if (!tile.tilled) {
+      tile.tilled = true;
+      showToast('Tanah dicangkul!');
+    } else {
+      showToast('Tanah sudah dicangkul.');
+    }
+    return;
+  }
+
+  if (tool === 'water') {
+    if (!tile.tilled) {
+      showToast('Cangkul tanahnya dulu sebelum menyiram!');
+    } else if (!tile.watered) {
+      tile.watered = true;
+      showToast('Tanah disiram!');
+    } else {
+      showToast('Tanah sudah basah.');
+    }
+    return;
+  }
+
+  if (tool.startsWith('seed_')) {
+    const cropKey = tool.replace('seed_', '');
+    const crop = CROPS_DB[cropKey];
+    if (!crop) return;
+    const currentSeason = SEASONS[GAME.seasonIdx].id;
+
+    if (!tile.tilled) {
+      showToast('Cangkul tanahnya terlebih dahulu!');
+      return;
+    }
+    if (tile.cropKey) {
+      showToast('Sudah ada tanaman di petak ini!');
+      return;
+    }
+    if ((GAME.seeds[cropKey] || 0) <= 0) {
+      showToast('Benih habis! Beli di Toko.');
+      return;
+    }
+    if (crop.season !== currentSeason) {
+      const sIndo = SEASONS.find(s => s.id === crop.season).name;
+      showToast(`❌ ${crop.name} khusus ${sIndo}!`);
+      return;
+    }
+
+    GAME.seeds[cropKey]--;
+    tile.cropKey = cropKey;
+    tile.daysGrown = 0;
+    tile.monsterMutated = false;
+    rollCropMutationAndWeight(tile, cropKey);
+    renderToolbar();
+    showToast(`Menanam benih ${crop.name}!`);
+  }
+}
+
+function sleepNextDay() {
+  advanceDay();
+  showToast(`Selamat pagi! Hari ke-${GAME.day} (${SEASONS[GAME.seasonIdx].name})`);
+}
+
+function advanceDay() {
+  GAME.day++;
+  GAME.timeMinutes = 360;
+  GAME.playerHp = GAME.playerMaxHp;
+  GAME.workers.forEach(w => { w.hp = w.maxHp; });
+
+  const newSeasonIdx = Math.floor((GAME.day - 1) / 7) % 4;
+  const seasonChanged = newSeasonIdx !== GAME.seasonIdx;
+  GAME.seasonIdx = newSeasonIdx;
+  const currentSeason = SEASONS[GAME.seasonIdx].id;
+
+  Object.keys(GAME.tiles).forEach(k => {
+    const t = GAME.tiles[k];
+    if (t && t.cropKey && CROPS_DB[t.cropKey]) {
+      const crop = CROPS_DB[t.cropKey];
+      if (crop.season !== currentSeason) {
+        t.cropKey = null;
+        t.daysGrown = 0;
+        t.watered = false;
+        t.jumbo = false;
+        t.weightKg = 0;
+        t.monsterMutated = false;
+      } else if (t.watered) {
+        t.daysGrown++;
+        if (!t.weightKg) rollCropMutationAndWeight(t, t.cropKey);
+        if (t.daysGrown >= crop.days && !t.monsterMutated && Math.random() < 0.25) {
+          const parts = k.split(',');
+          t.monsterMutated = true;
+          const wNow = t.weightKg;
+          const cKey = t.cropKey;
+          t.cropKey = null;
+          t.daysGrown = 0;
+          t.watered = false;
+          t.jumbo = false;
+          t.weightKg = 0;
+          spawnMonsterFromTile(Number(parts[0]), Number(parts[1]), cKey, wNow);
+        }
+      }
+    }
+    if (t) t.watered = false;
+  });
+
+  if (seasonChanged) {
+    showToast(`Musim berganti menjadi ${SEASONS[GAME.seasonIdx].name}!`);
+    renderToolbar();
+  }
+  updateHUD();
+}
+
+// ============================================================================
+// 5. RENDER DUNIA, PETI AI, 2 PEKERJA PETANI AI & 16 SPRITE MONSTER TANAMAN
+// ============================================================================
+function render() {
+  const season = SEASONS[GAME.seasonIdx];
+  ctx.fillStyle = season.ground;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const targetCamX = GAME.px * TILE_SIZE - canvas.width / 2;
+  const targetCamY = GAME.py * TILE_SIZE - canvas.height / 2 + 20;
+  GAME.camX += (targetCamX - GAME.camX) * 0.12;
+  GAME.camY += (targetCamY - GAME.camY) * 0.12;
+
+  ctx.save();
+  ctx.translate(-Math.round(GAME.camX), -Math.round(GAME.camY));
+
+  for (let y = 0; y < GAME.mapH; y++) {
+    for (let x = 0; x < GAME.mapW; x++) {
+      if ((x + y) % 2 === 0) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+        ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+      }
+    }
+  }
+
+  LAND_ZONES.forEach(z => {
+    const zx = z.x * TILE_SIZE;
+    const zy = z.y * TILE_SIZE;
+    const zw = z.w * TILE_SIZE;
+    const zh = z.h * TILE_SIZE;
+
+    ctx.strokeStyle = z.unlocked ? '#92400e' : '#ef4444';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(zx - 2, zy - 2, zw + 4, zh + 4);
+
+    if (!z.unlocked) {
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
+      ctx.fillRect(zx, zy, zw, zh);
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = 'bold 11px Courier New';
+      ctx.fillText(`🔒 ${z.name}`, zx + 8, zy + 24);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(`Harga: $${z.price}`, zx + 8, zy + 42);
+    } else {
+      for (let ty = z.y; ty < z.y + z.h; ty++) {
+        for (let tx = z.x; tx < z.x + z.w; tx++) {
+          const px = tx * TILE_SIZE;
+          const py = ty * TILE_SIZE;
+          const tileKey = `${tx},${ty}`;
+          const tile = GAME.tiles[tileKey];
+
+          ctx.fillStyle = '#a16207';
+          ctx.fillRect(px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+
+          if (tile && tile.tilled) {
+            ctx.fillStyle = tile.watered ? '#3f1d0b' : '#78350f';
+            ctx.fillRect(px + 3, py + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+            ctx.fillStyle = tile.watered ? '#291206' : '#5c280b';
+            ctx.fillRect(px + 6, py + 11, TILE_SIZE - 12, 3);
+            ctx.fillRect(px + 6, py + 21, TILE_SIZE - 12, 3);
+            ctx.fillRect(px + 6, py + 31, TILE_SIZE - 12, 3);
+          }
+
+          if (tile && tile.cropKey && CROPS_DB[tile.cropKey]) {
+            const crop = CROPS_DB[tile.cropKey];
+            const ratio = tile.daysGrown / crop.days;
+            const isReady = ratio >= 1;
+            let sprite = SPRITES['stage_0'];
+            if (isReady && SPRITES['crop_' + tile.cropKey]) {
+              sprite = SPRITES['crop_' + tile.cropKey];
+            } else if (ratio >= 0.5 && SPRITES['stage_2']) {
+              sprite = SPRITES['stage_2'];
+            } else if (tile.daysGrown >= 1 && SPRITES['stage_1']) {
+              sprite = SPRITES['stage_1'];
+            }
+
+            const baseSize = tile.jumbo ? TILE_SIZE - 4 : TILE_SIZE - 12;
+            const bounce = isReady ? Math.sin(performance.now() / 180) * 2.5 : 0;
+            const offset = (TILE_SIZE - baseSize) / 2;
+
+            if (tile.jumbo) {
+              ctx.strokeStyle = '#fbbf24';
+              ctx.lineWidth = 2;
+              ctx.strokeRect(px + 3, py + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+            }
+
+            if (sprite) {
+              ctx.drawImage(sprite, px + offset, py + offset + bounce, baseSize, baseSize);
+            }
+
+            if (isReady && tile.weightKg > 0) {
+              ctx.fillStyle = tile.jumbo ? '#fbbf24' : '#ffffff';
+              ctx.font = 'bold 9px Courier New';
+              ctx.fillText(`${tile.weightKg}kg`, px + 4, py + TILE_SIZE - 4);
+            }
+          }
+        }
+      }
+    }
+  });
+
+  if (GAME.workers.some(w => w.hired)) {
+    const bx = SEED_BOX_POS.tx * TILE_SIZE;
+    const by = SEED_BOX_POS.ty * TILE_SIZE;
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(bx + 4, by + 6, TILE_SIZE - 8, TILE_SIZE - 10);
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(bx + 4, by + 6, TILE_SIZE - 8, TILE_SIZE - 10);
+    ctx.fillStyle = '#e0f2fe';
+    ctx.font = 'bold 8px Courier New';
+    ctx.fillText('PETI AI', bx + 7, by + 24);
+  }
+
+  // Render 16 Sprite Pixel Art Monster Tanaman Unik
+  GAME.monsters.forEach(m => {
+    const mx = m.x * TILE_SIZE;
+    const my = m.y * TILE_SIZE;
+    const bounce = Math.sin(performance.now() / 130) * 2.5;
+    const mSprite = SPRITES['monster_' + m.cropKey] || SPRITES['monster_strawberry'];
+
+    ctx.fillStyle = 'rgba(220, 38, 38, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(mx, my + 12, 14, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (mSprite) {
+      ctx.drawImage(mSprite, mx - 20, my - 20 + bounce, 40, 32);
+    }
+
+    if (m.hitFlash > 0) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fillRect(mx - 18, my - 18 + bounce, 36, 28);
+    }
+
+    const hpRatio = Math.max(0, m.hp / m.maxHp);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(mx - 18, my - 26, 36, 4);
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(mx - 18, my - 26, 36 * hpRatio, 4);
+
+    ctx.fillStyle = '#fca5a5';
+    ctx.font = 'bold 8.5px Courier New';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${m.name} (${m.hp}HP)`, mx, my - 29);
+    ctx.textAlign = 'left';
+  });
+
+  const target = getTargetTile();
+  ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(target.tx * TILE_SIZE + 2, target.ty * TILE_SIZE + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+
+  // Render 2 Petani AI (jika disewa)
+  GAME.workers.forEach(w => {
+    if (w.hired && SPRITES[w.spriteId]) {
+      const wSprite = SPRITES[w.spriteId][w.animFrame];
+      const wx = w.x * TILE_SIZE - 22;
+      const wy = w.y * TILE_SIZE - 34;
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+      ctx.beginPath();
+      ctx.ellipse(w.x * TILE_SIZE, w.y * TILE_SIZE + 10, 11, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.drawImage(wSprite, wx, wy, 44, 38);
+
+      if (w.weaponId && WEAPONS_DB[w.weaponId]) {
+        ctx.fillStyle = WEAPONS_DB[w.weaponId].color;
+        ctx.fillRect(wx + 37, wy + 12, 4, 14);
+      }
+
+      ctx.fillStyle = w.id === 1 ? '#38bdf8' : '#f472b6';
+      ctx.font = 'bold 9px Courier New';
+      ctx.textAlign = 'center';
+      ctx.fillText(`AI#${w.id}: ${w.statusLabel}`, w.x * TILE_SIZE, wy - 5);
+      ctx.textAlign = 'left';
+    }
+  });
+
+  if (SPRITES[GAME.charId]) {
+    const charSprite = SPRITES[GAME.charId][GAME.animFrame];
+    const drawPx = GAME.px * TILE_SIZE - 22;
+    const drawPy = GAME.py * TILE_SIZE - 34;
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(GAME.px * TILE_SIZE, GAME.py * TILE_SIZE + 10, 12, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.drawImage(charSprite, drawPx, drawPy, 44, 38);
+
+    if (GAME.playerWeaponId && WEAPONS_DB[GAME.playerWeaponId]) {
+      ctx.fillStyle = WEAPONS_DB[GAME.playerWeaponId].color;
+      ctx.fillRect(drawPx + 38, drawPy + 11, 4, 15);
+    }
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px Courier New';
+    ctx.textAlign = 'center';
+    ctx.fillText(GAME.playerName, GAME.px * TILE_SIZE, drawPy - 5);
+    ctx.textAlign = 'left';
+  }
+
+  ctx.restore();
+}
+
+// ============================================================================
+// 6. HUD, TOOLBAR, TOKO, PERLENGKAPAN PEDANG/ZIRAH, PETI AI & GUDANG PANEN
+// ============================================================================
+function updateHUD() {
+  const season = SEASONS[GAME.seasonIdx];
+  const seasonEl = document.getElementById('hudSeason');
+  const dayEl = document.getElementById('hudDay');
+  const moneyEl = document.getElementById('hudMoney');
+  const plotsEl = document.getElementById('hudPlots');
+  const hpEl = document.getElementById('hudPlayerHp');
+
+  if (seasonEl) {
+    seasonEl.textContent = season.name;
+    seasonEl.style.color = season.color;
+  }
+  if (dayEl) dayEl.textContent = GAME.day;
+  if (moneyEl) moneyEl.textContent = GAME.money;
+  if (plotsEl) plotsEl.textContent = LAND_ZONES.filter(z => z.unlocked).length;
+  if (hpEl) hpEl.textContent = GAME.playerHp;
+}
+
+function renderToolbar() {
+  const tb = document.getElementById('toolbar');
+  if (!tb) return;
+  tb.innerHTML = '';
+
+  const tools = [
+    { id: 'hoe', label: 'Cangkul', icon: '⛏️' },
+    { id: 'water', label: 'Siram', icon: '💧' }
+  ];
+
+  tools.forEach(t => {
+    const slot = document.createElement('div');
+    slot.className = 'slot' + (GAME.selectedTool === t.id ? ' active' : '');
+    slot.addEventListener('click', () => {
+      GAME.selectedTool = t.id;
+      renderToolbar();
+    });
+    slot.innerHTML = `<div style="font-size:16px;">${t.icon}</div><div>${t.label}</div>`;
+    tb.appendChild(slot);
+  });
+
+  Object.keys(GAME.seeds).forEach(cropKey => {
+    const count = GAME.seeds[cropKey];
+    if (count > 0 && CROPS_DB[cropKey]) {
+      const crop = CROPS_DB[cropKey];
+      const slotId = 'seed_' + cropKey;
+      const slot = document.createElement('div');
+      slot.className = 'slot' + (GAME.selectedTool === slotId ? ' active' : '');
+      slot.addEventListener('click', () => {
+        GAME.selectedTool = slotId;
+        renderToolbar();
+      });
+
+      const img = document.createElement('canvas');
+      img.width = 24;
+      img.height = 20;
+      const ictx = img.getContext('2d');
+      ictx.imageSmoothingEnabled = false;
+      if (SPRITES['crop_' + cropKey]) {
+        ictx.drawImage(SPRITES['crop_' + cropKey], 0, 0, 24, 20);
+      }
+
+      slot.innerHTML = `<span class="slot-count">${count}</span>`;
+      slot.appendChild(img);
+      const lbl = document.createElement('div');
+      lbl.textContent = crop.name;
+      slot.appendChild(lbl);
+      tb.appendChild(slot);
+    }
+  });
+}
+
+function openShop() {
+  const box = document.getElementById('shopContent');
+  if (!box) return;
+  box.innerHTML = '<div class="text-sky-400 font-bold text-xs my-2">🤖 SEWA 2 PEKERJA PETANI AI (SEMUA LAHAN)</div>';
+
+  GAME.workers.forEach(w => {
+    const row = document.createElement('div');
+    row.className = 'shop-row';
+    if (!w.hired) {
+      row.innerHTML = `
+        <div>
+          <strong class="text-sky-400 text-xs">${w.label}</strong><br>
+          <span class="text-[11px] text-slate-400">Otomatis mengurus seluruh lahan terbuka & lawan monster</span>
+        </div>
+        <button type="button" class="hud-btn" style="background-color:#0284c7; border-color:#38bdf8;" onclick="hireFarmerById(${w.id})">Sewa $${WORKER_HIRE_COST}</button>
+      `;
+    } else {
+      row.innerHTML = `
+        <div>
+          <strong class="text-emerald-400 text-xs">${w.label} Aktif</strong><br>
+          <span class="text-[11px] text-slate-400">Status: ${w.statusLabel}</span>
+        </div>
+        <span class="text-xs text-emerald-400 font-bold">✔ Aktif</span>
+      `;
+    }
+    box.appendChild(row);
+  });
+
+  box.innerHTML += '<div class="text-rose-400 font-bold text-xs mt-3 mb-2">⚔️ PEDANG & BAJU ZIRAH (LAWAN MONSTER)</div>';
+
+  Object.keys(WEAPONS_DB).forEach(wKey => {
+    const wp = WEAPONS_DB[wKey];
+    const owned = GAME.ownedWeapons.includes(wKey);
+    const row = document.createElement('div');
+    row.className = 'shop-row';
+    row.innerHTML = `
+      <div>
+        <strong class="text-xs" style="color:${wp.color};">${wp.name}</strong><br>
+        <span class="text-[10.5px] text-slate-300">Serangan +${wp.atk} ATK</span>
+      </div>
+      ${owned
+        ? '<span class="text-[10.5px] text-emerald-400 font-bold">Dimiliki</span>'
+        : `<button type="button" class="hud-btn" style="background-color:#991b1b; border-color:#f87171;" onclick="buyWeapon('${wKey}')">Beli $${wp.price}</button>`}
+    `;
+    box.appendChild(row);
+  });
+
+  Object.keys(ARMORS_DB).forEach(aKey => {
+    const ar = ARMORS_DB[aKey];
+    const owned = GAME.ownedArmors.includes(aKey);
+    const row = document.createElement('div');
+    row.className = 'shop-row';
+    row.innerHTML = `
+      <div>
+        <strong class="text-xs" style="color:${ar.color};">${ar.name}</strong><br>
+        <span class="text-[10.5px] text-slate-300">Pertahanan +${ar.def} DEF</span>
+      </div>
+      ${owned
+        ? '<span class="text-[10.5px] text-emerald-400 font-bold">Dimiliki</span>'
+        : `<button type="button" class="hud-btn" style="background-color:#5b21b6; border-color:#c084fc;" onclick="buyArmor('${aKey}')">Beli $${ar.price}</button>`}
+    `;
+    box.appendChild(row);
+  });
+
+  box.innerHTML += '<div class="text-amber-400 font-bold text-xs mt-3 mb-2">📜 PERLUASAN LAHAN PERTANIAN</div>';
+
+  LAND_ZONES.forEach(z => {
+    if (!z.unlocked) {
+      const row = document.createElement('div');
+      row.className = 'shop-row';
+      row.innerHTML = `
+        <div>
+          <strong class="text-amber-400 text-xs">${z.name}</strong><br>
+          <span class="text-[11px] text-slate-400">Ukuran ${z.w}x${z.h} petak (otomatis dipakai AI!)</span>
+        </div>
+        <button type="button" class="hud-btn" style="background-color:#16a34a; border-color:#4ade80;" onclick="buyLand(${z.id})">Beli $${z.price}</button>
+      `;
+      box.appendChild(row);
+    }
+  });
+
+  const currentSeason = SEASONS[GAME.seasonIdx];
+  box.innerHTML += `<div class="text-emerald-400 font-bold text-xs mt-3 mb-2">🌱 BENIH MUSIM INI (${currentSeason.name})</div>`;
+
+  Object.keys(CROPS_DB).forEach(key => {
+    const c = CROPS_DB[key];
+    const isCurrent = c.season === currentSeason.id;
+    const seasonInfo = SEASONS.find(s => s.id === c.season);
+
+    const row = document.createElement('div');
+    row.className = 'shop-row';
+    if (!isCurrent) row.style.opacity = '0.55';
+
+    const iconCanvas = document.createElement('canvas');
+    iconCanvas.width = 28;
+    iconCanvas.height = 24;
+    const ictx = iconCanvas.getContext('2d');
+    ictx.imageSmoothingEnabled = false;
+    if (SPRITES['crop_' + key]) {
+      ictx.drawImage(SPRITES['crop_' + key], 0, 0, 28, 24);
+    }
+
+    const left = document.createElement('div');
+    left.className = 'flex items-center gap-2';
+    left.appendChild(iconCanvas);
+
+    const info = document.createElement('div');
+    info.innerHTML = `
+      <strong class="text-xs">${c.name}</strong> <span class="text-[10px]" style="color:${seasonInfo.color};">[${seasonInfo.name}]</span><br>
+      <span class="text-[10px] text-slate-300">Tumbuh: ${c.days} Hari | Dasar: $${c.sellPrice} (Pajak 30%)</span>
+    `;
+    left.appendChild(info);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'hud-btn';
+    btn.textContent = `Beli $${c.seedPrice}`;
+    btn.addEventListener('click', () => buySeed(key));
+
+    row.appendChild(left);
+    row.appendChild(btn);
+    box.appendChild(row);
+  });
+
+  document.getElementById('modalShop').classList.remove('hidden');
+}
+
+function hireFarmerById(workerId) {
+  const worker = GAME.workers.find(w => w.id === workerId);
+  if (!worker || worker.hired) return;
+  if (GAME.money < WORKER_HIRE_COST) {
+    showToast('Sisa uang belum cukup untuk menyewa Petani AI!');
+    return;
+  }
+  GAME.money -= WORKER_HIRE_COST;
+  worker.hired = true;
+  worker.state = 'IDLE';
+  pushAiLog(`${worker.label} mulai bertugas di seluruh lahan terbuka.`);
+  syncWorkerUI();
+  updateHUD();
+  openShop();
+  showToast(`🤖 ${worker.label} aktif! Taruh bibit di Peti AI atau beri senjata di Perlengkapan.`);
+}
+
+function buyWeapon(weaponId) {
+  const wp = WEAPONS_DB[weaponId];
+  if (!wp || GAME.ownedWeapons.includes(weaponId)) return;
+  if (GAME.money < wp.price) {
+    showToast('Uang belum cukup untuk membeli pedang!');
+    return;
+  }
+  GAME.money -= wp.price;
+  GAME.ownedWeapons.push(weaponId);
+  GAME.playerWeaponId = weaponId;
+  updateHUD();
+  openShop();
+  showToast(`⚔️ Membeli ${wp.name}!`);
+}
+
+function buyArmor(armorId) {
+  const ar = ARMORS_DB[armorId];
+  if (!ar || GAME.ownedArmors.includes(armorId)) return;
+  if (GAME.money < ar.price) {
+    showToast('Uang belum cukup untuk membeli baju zirah!');
+    return;
+  }
+  GAME.money -= ar.price;
+  GAME.ownedArmors.push(armorId);
+  GAME.playerArmorId = armorId;
+  updateHUD();
+  openShop();
+  showToast(`🛡️ Membeli ${ar.name}!`);
+}
+
+function openGearModal() {
+  const box = document.getElementById('gearContent');
+  if (!box) return;
+  box.innerHTML = '';
+
+  const pStats = getCombatStats(GAME.playerWeaponId, GAME.playerArmorId);
+  const pCard = document.createElement('div');
+  pCard.className = 'shop-row flex-col items-start';
+  pCard.innerHTML = `
+    <div class="w-full flex justify-between">
+      <strong class="text-sky-400 text-xs">Bos ${GAME.playerName}</strong>
+      <span class="text-[11px] text-amber-300">ATK ${pStats.atk} | DEF ${pStats.def}</span>
+    </div>
+    <div class="text-[11px] text-slate-300 mt-1">
+      Pedang: <strong>${GAME.playerWeaponId ? WEAPONS_DB[GAME.playerWeaponId].name : 'Tangan Kosong'}</strong> |
+      Zirah: <strong>${GAME.playerArmorId ? ARMORS_DB[GAME.playerArmorId].name : 'Jas Biasa'}</strong>
+    </div>
+  `;
+
+  if (GAME.ownedWeapons.length > 0 || GAME.ownedArmors.length > 0) {
+    const btnWrap = document.createElement('div');
+    btnWrap.className = 'flex flex-wrap gap-1 mt-2';
+    GAME.ownedWeapons.forEach(wId => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'hud-btn';
+      b.textContent = `Pakai ${WEAPONS_DB[wId].name}`;
+      b.onclick = () => {
+        GAME.playerWeaponId = wId;
+        openGearModal();
+      };
+      btnWrap.appendChild(b);
+    });
+    GAME.ownedArmors.forEach(aId => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'hud-btn';
+      b.textContent = `Pakai ${ARMORS_DB[aId].name}`;
+      b.onclick = () => {
+        GAME.playerArmorId = aId;
+        openGearModal();
+      };
+      btnWrap.appendChild(b);
+    });
+    pCard.appendChild(btnWrap);
+  }
+  box.appendChild(pCard);
+
+  GAME.workers.forEach(w => {
+    const wStats = getCombatStats(w.weaponId, w.armorId);
+    const card = document.createElement('div');
+    card.className = 'shop-row flex-col items-start mt-2';
+    card.innerHTML = `
+      <div class="w-full flex justify-between">
+        <strong class="text-emerald-400 text-xs">${w.label} (${w.hired ? 'Aktif' : 'Belum Disewa'})</strong>
+        <span class="text-[11px] text-amber-300">ATK ${wStats.atk} | DEF ${wStats.def}</span>
+      </div>
+      <div class="text-[11px] text-slate-300 mt-1">
+        Pedang: <strong>${w.weaponId ? WEAPONS_DB[w.weaponId].name : 'Tidak Ada'}</strong> |
+        Zirah: <strong>${w.armorId ? ARMORS_DB[w.armorId].name : 'Tidak Ada'}</strong>
+      </div>
+      <div class="text-[11px] text-sky-300 mt-1">
+        Area Kerja: <strong>Semua Lahan Terbuka (${LAND_ZONES.filter(z => z.unlocked).length}/4 Zona)</strong>
+      </div>
+    `;
+
+    const actionRow = document.createElement('div');
+    actionRow.className = 'flex flex-wrap gap-1 mt-2';
+
+    GAME.ownedWeapons.forEach(wId => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'hud-btn';
+      b.style.backgroundColor = '#7f1d1d';
+      b.textContent = `Beri ${WEAPONS_DB[wId].name}`;
+      b.onclick = () => {
+        w.weaponId = wId;
+        pushAiLog(`${WEAPONS_DB[wId].name} diberikan ke ${w.label}.`);
+        openGearModal();
+      };
+      actionRow.appendChild(b);
+    });
+
+    GAME.ownedArmors.forEach(aId => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'hud-btn';
+      b.style.backgroundColor = '#4c1d95';
+      b.textContent = `Beri ${ARMORS_DB[aId].name}`;
+      b.onclick = () => {
+        w.armorId = aId;
+        pushAiLog(`${ARMORS_DB[aId].name} diberikan ke ${w.label}.`);
+        openGearModal();
+      };
+      actionRow.appendChild(b);
+    });
+
+    card.appendChild(actionRow);
+    box.appendChild(card);
+  });
+
+  document.getElementById('modalGear').classList.remove('hidden');
+}
+
+function buyLand(zoneId) {
+  const zone = LAND_ZONES.find(z => z.id === zoneId);
+  if (!zone || zone.unlocked) return;
+  if (GAME.money < zone.price) {
+    showToast('Uang belum cukup untuk membeli sertifikat lahan ini!');
+    return;
+  }
+  GAME.money -= zone.price;
+  zone.unlocked = true;
+  GAME.workers.forEach(w => {
+    if (w.hired && w.state === 'IDLE') w.targetTileKey = null;
+  });
+  pushAiLog(`Sertifikat ${zone.name} dibeli! Petani AI langsung memperluas kerja ke lahan baru.`);
+  updateHUD();
+  openShop();
+  showToast(`🎉 Berhasil memperluas ${zone.name}! AI otomatis memakai lahan baru ini.`);
+}
+
+function buySeed(cropKey) {
+  const crop = CROPS_DB[cropKey];
+  if (!crop) return;
+  if (GAME.money < crop.seedPrice) {
+    showToast('Sisa uang tidak cukup!');
+    return;
+  }
+  GAME.money -= crop.seedPrice;
+  GAME.seeds[cropKey] = (GAME.seeds[cropKey] || 0) + 1;
+  GAME.selectedTool = 'seed_' + cropKey;
+  updateHUD();
+  renderToolbar();
+  showToast(`Membeli 1 benih ${crop.name}`);
+}
+
+function openSeedBox() {
+  if (!GAME.workers.some(w => w.hired)) {
+    showToast('Sewa minimal 1 Pekerja Petani AI terlebih dahulu di Toko!');
+    return;
+  }
+  const logBox = document.getElementById('aiLogBox');
+  if (logBox) {
+    logBox.innerHTML = GAME.aiLogs.map(line => `<div>${line}</div>`).join('');
+  }
+
+  const box = document.getElementById('seedBoxContent');
+  if (!box) return;
+  box.innerHTML = '';
+
+  const ownedSeedKeys = Object.keys(GAME.seeds).filter(k => (GAME.seeds[k] || 0) > 0 && CROPS_DB[k]);
+  const storedSeedKeys = Object.keys(GAME.seedBox).filter(k => (GAME.seedBox[k] || 0) > 0 && CROPS_DB[k]);
+
+  box.innerHTML += '<div class="text-amber-400 font-bold text-xs mb-1">Bibit di Tas Kamu (Taruh ke Peti AI):</div>';
+  if (ownedSeedKeys.length === 0) {
+    box.innerHTML += '<p class="text-[11px] text-slate-400 mb-2">Tidak ada bibit di tasmu.</p>';
+  } else {
+    ownedSeedKeys.forEach(k => {
+      const c = CROPS_DB[k];
+      const count = GAME.seeds[k];
+      const row = document.createElement('div');
+      row.className = 'shop-row';
+      row.innerHTML = `
+        <div class="text-xs"><strong>${c.name}</strong> (Tas: ${count})</div>
+        <button type="button" class="hud-btn" style="background-color:#d97706; border-color:#fbbf24;" onclick="depositSeedToBox('${k}')">Taruh 1</button>
+      `;
+      box.appendChild(row);
+    });
+  }
+
+  box.innerHTML += '<div class="text-emerald-400 font-bold text-xs mt-3 mb-1">Isi Peti Penyimpanan AI:</div>';
+  if (storedSeedKeys.length === 0) {
+    box.innerHTML += '<p class="text-[11px] text-slate-400">Peti AI kosong (atau seluruh bibit sedang ditanam di lahan).</p>';
+  } else {
+    storedSeedKeys.forEach(k => {
+      const c = CROPS_DB[k];
+      const count = GAME.seedBox[k];
+      const row = document.createElement('div');
+      row.className = 'shop-row';
+      row.innerHTML = `
+        <div class="text-xs"><strong>${c.name}</strong></div>
+        <div class="text-amber-400 font-bold text-xs">${count} Bibit</div>
+      `;
+      box.appendChild(row);
+    });
+  }
+
+  document.getElementById('modalSeedBox').classList.remove('hidden');
+}
+
+function depositSeedToBox(cropKey) {
+  if ((GAME.seeds[cropKey] || 0) <= 0) return;
+  GAME.seeds[cropKey]--;
+  GAME.seedBox[cropKey] = (GAME.seedBox[cropKey] || 0) + 1;
+  pushAiLog(`Bibit ${CROPS_DB[cropKey].name} dimasukkan ke Peti AI.`);
+  renderToolbar();
+  openSeedBox();
+}
+
+function wakeAiFarmerNow() {
+  GAME.workers.forEach(w => {
+    if (w.hired) {
+      w.state = 'IDLE';
+      w.targetTileKey = null;
+    }
+  });
+  closeModals();
+  showToast('🤖 Kedua Petani AI aktif bekerja di seluruh lahan terbuka!');
+}
+
+function openBag() {
+  const box = document.getElementById('bagContent');
+  if (!box) return;
+  box.innerHTML = '';
+
+  if (GAME.bag.length === 0) {
+    box.innerHTML = '<p class="text-slate-400 text-xs">Gudang panen kosong (panen AI langsung dijual ke saldo setelah pajak 30%).</p>';
+  } else {
+    GAME.bag.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'shop-row';
+      const jumboBadge = item.jumbo
+        ? '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400 ml-1">MUTASI JUMBO</span>'
+        : `<span class="text-[10px] text-slate-400 ml-1">[${item.chunkLabel || 'Chunk'}]</span>`;
+      row.innerHTML = `
+        <div>
+          <strong class="text-xs">${item.name}</strong>${jumboBadge}<br>
+          <span class="text-[11px] text-slate-300">Berat: <strong>${item.weightKg} kg</strong> | Kotor: $${item.grossPrice} | Pajak 30%: -$${item.tax}</span>
+        </div>
+        <div class="text-emerald-400 font-bold text-xs">Bersih $${item.price}</div>
+      `;
+      box.appendChild(row);
+    });
+  }
+
+  document.getElementById('modalBag').classList.remove('hidden');
+}
+
+function sellAllCrops() {
+  if (GAME.bag.length === 0) {
+    showToast('Tidak ada hasil panen untuk dijual!');
+    return;
+  }
+
+  let totalGross = 0;
+  let totalTax = 0;
+  let totalNet = 0;
+
+  GAME.bag.forEach(item => {
+    totalGross += item.grossPrice || item.price;
+    totalTax += item.tax || Math.round((item.grossPrice || item.price) * TAX_RATE);
+    totalNet += item.price;
+  });
+  GAME.bag = [];
+
+  GAME.money += totalNet;
+  updateHUD();
+  closeModals();
+  showToast(`💰 Terjual +$${totalNet} bersih (Kotor $${totalGross}, Pajak 30%: -$${totalTax})`);
+}
+
+function closeModals() {
+  document.getElementById('modalShop').classList.add('hidden');
+  document.getElementById('modalBag').classList.add('hidden');
+  document.getElementById('modalSeedBox').classList.add('hidden');
+  document.getElementById('modalGear').classList.add('hidden');
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(GAME.toastTimeout);
+  GAME.toastTimeout = setTimeout(() => {
+    el.classList.add('hidden');
+  }, 2600);
+}
+</script>
+</body>
+</html>
